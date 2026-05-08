@@ -47,8 +47,15 @@ export const adminApi = {
       request<void>(`/api/admin/occurrences/${id}`, { method: "DELETE" }),
   },
   gallery: {
-    list: () =>
-      request<{ data: GalleryRow[] }>("/api/admin/gallery").then((r) => r.data),
+    list: (params?: { page?: number; limit?: number }) => {
+      const search = new URLSearchParams();
+      if (params?.page) search.set("page", String(params.page));
+      if (params?.limit) search.set("limit", String(params.limit));
+      const qs = search.toString();
+      return request<PaginatedResponse<GalleryRow>>(
+        `/api/admin/gallery${qs ? `?${qs}` : ""}`,
+      );
+    },
     create: (body: GalleryInput) =>
       request<{ data: GalleryRow }>("/api/admin/gallery", {
         method: "POST",
@@ -77,10 +84,16 @@ export const adminApi = {
     return json.data.publicUrl;
   },
   registrations: {
-    list: () =>
-      request<{ data: RegistrationRow[] }>("/api/admin/registrations").then(
-        (r) => r.data,
-      ),
+    list: (params?: { page?: number; limit?: number; q?: string }) => {
+      const search = new URLSearchParams();
+      if (params?.page) search.set("page", String(params.page));
+      if (params?.limit) search.set("limit", String(params.limit));
+      if (params?.q) search.set("q", params.q);
+      const qs = search.toString();
+      return request<PaginatedResponse<RegistrationRow>>(
+        `/api/admin/registrations${qs ? `?${qs}` : ""}`,
+      );
+    },
     update: (id: string, body: Partial<RegistrationInput>) =>
       request<{ data: RegistrationRow }>(`/api/admin/registrations/${id}`, {
         method: "PATCH",
@@ -89,6 +102,16 @@ export const adminApi = {
     delete: (id: string) =>
       request<void>(`/api/admin/registrations/${id}`, { method: "DELETE" }),
   },
+};
+
+export type PaginatedResponse<T> = {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 };
 
 export type TemplateCategory =

@@ -12,17 +12,24 @@ import {
   type GalleryRow,
   type GallerySection,
 } from "../lib/admin-api";
+import { Pagination } from "../components/Pagination";
+
+const PAGE_LIMIT = 30;
 
 const sections: GallerySection[] = ["live", "workshops", "adventures", "food"];
 
 export const AdminGalleryPage = () => {
   const queryClient = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
+  const [page, setPage] = useState(1);
 
   const galleryQuery = useQuery({
-    queryKey: ["admin", "gallery"],
-    queryFn: adminApi.gallery.list,
+    queryKey: ["admin", "gallery", page],
+    queryFn: () => adminApi.gallery.list({ page, limit: PAGE_LIMIT }),
   });
+
+  const items = galleryQuery.data?.data ?? [];
+  const pagination = galleryQuery.data?.pagination;
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["admin", "gallery"] });
@@ -58,26 +65,21 @@ export const AdminGalleryPage = () => {
       {galleryQuery.isLoading ? (
         <p className="text-muted-foreground">Loading…</p>
       ) : (
-        <div className="space-y-10">
-          {sections.map((section) => {
-            const items = (galleryQuery.data ?? []).filter(
-              (i) => i.section === section,
-            );
-            return (
-              <div key={section}>
-                <h2 className="text-xl font-bold capitalize mb-4">
-                  {section}{" "}
-                  <span className="text-sm text-muted-foreground font-normal">
-                    ({items.length})
-                  </span>
-                </h2>
-                {items.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No images in this section.
-                  </p>
-                ) : (
+        <>
+          <div className="space-y-10">
+            {sections.map((section) => {
+              const sectionItems = items.filter((i) => i.section === section);
+              if (sectionItems.length === 0) return null;
+              return (
+                <div key={section}>
+                  <h2 className="text-xl font-bold capitalize mb-4">
+                    {section}{" "}
+                    <span className="text-sm text-muted-foreground font-normal">
+                      ({sectionItems.length})
+                    </span>
+                  </h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {items.map((item) => (
+                    {sectionItems.map((item) => (
                       <GalleryCard
                         key={item.id}
                         item={item}
@@ -89,11 +91,20 @@ export const AdminGalleryPage = () => {
                       />
                     ))}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                </div>
+              );
+            })}
+          </div>
+          {pagination ? (
+            <Pagination
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              total={pagination.total}
+              limit={pagination.limit}
+              onChange={setPage}
+            />
+          ) : null}
+        </>
       )}
     </div>
   );
@@ -257,13 +268,6 @@ const GalleryForm = ({
             className="w-full max-h-40 object-cover rounded-lg border border-border"
           />
         ) : null}
-        <input
-          required
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="…or paste an image URL"
-          className={`w-full px-3 py-2 bg-background border border-border rounded-lg ${inline ? "text-xs" : ""}`}
-        />
       </div>
       <div className={`grid ${inline ? "" : "md:grid-cols-2"} gap-2`}>
         <input
@@ -309,8 +313,8 @@ const GalleryForm = ({
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={create.isPending || update.isPending}
-          className={`bg-primary text-primary-foreground rounded-lg font-bold ${inline ? "text-xs px-3 py-1.5" : "px-4 py-2"}`}
+          disabled={!url || create.isPending || update.isPending}
+          className={`bg-primary text-primary-foreground rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed ${inline ? "text-xs px-3 py-1.5" : "px-4 py-2"}`}
         >
           {item ? "Update" : "Create"}
         </button>

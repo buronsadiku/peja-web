@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   activityOccurrences,
@@ -12,6 +12,33 @@ import { requireAdminApi } from "@/lib/auth/api-guard";
 export const GET = async (request: Request) => {
   const guard = await requireAdminApi(request);
   if (guard.response) return guard.response;
+
+  const url = new URL(request.url);
+  const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10));
+  const limit = Math.min(
+    500,
+    Math.max(1, parseInt(url.searchParams.get("limit") ?? "100", 10)),
+  );
+  const q = (url.searchParams.get("q") ?? "").trim();
+  const offset = (page - 1) * limit;
+
+  const filters: SQL[] = [];
+  if (q) {
+    const like = `%${q}%`;
+    const orCondition = or(
+      ilike(registrations.email, like),
+      ilike(registrations.fullName, like),
+      ilike(registrations.phone, like),
+    );
+    if (orCondition) filters.push(orCondition);
+  }
+
+  const where = filters.length ? and(...filters) : undefined;
+
+  const [{ count }] = await db
+    .select({ count: sql<number>`COUNT(*)::int` })
+    .from(registrations)
+    .where(where);
 
   const rows = await db
     .select({
@@ -50,8 +77,19 @@ export const GET = async (request: Request) => {
       activityTemplates,
       eq(activityTemplates.id, activityOccurrences.templateId),
     )
+    .where(where)
     .groupBy(registrations.id)
-    .orderBy(desc(registrations.createdAt));
+    .orderBy(desc(registrations.createdAt))
+    .limit(limit)
+    .offset(offset);
 
-  return NextResponse.json({ data: rows });
+  return NextResponse.json({
+    data: rows,
+    pagination: {
+      page,
+      limit,
+      total: count,
+      totalPages: Math.max(1, Math.ceil(count / limit)),
+    },
+  });
 };
