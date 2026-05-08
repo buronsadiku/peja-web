@@ -1,26 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
+import { Pencil, Trash2 } from "lucide-react";
 import {
   adminApi,
   type FestivalDayRow,
 } from "../lib/admin-api";
 
+const dateToString = (d: Date) => {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const stringToDate = (s: string) => {
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
 export const AdminFestivalDaysPage = () => {
   const queryClient = useQueryClient();
-  const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const [pendingError, setPendingError] = useState<string | null>(null);
 
   const daysQuery = useQuery({
     queryKey: ["admin", "festival-days"],
     queryFn: adminApi.festivalDays.list,
   });
+
+  const days = daysQuery.data ?? [];
+  const dayByDate = useMemo(() => {
+    const map = new Map<string, FestivalDayRow>();
+    for (const d of days) map.set(d.date, d);
+    return map;
+  }, [days]);
+
+  const selectedDates = useMemo(
+    () => days.map((d) => stringToDate(d.date)),
+    [days],
+  );
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["admin", "festival-days"] });
@@ -28,164 +54,177 @@ export const AdminFestivalDaysPage = () => {
     queryClient.invalidateQueries({ queryKey: ["activities"] });
   };
 
+  const create = useMutation({
+    mutationFn: adminApi.festivalDays.create,
+    onSuccess: () => {
+      setPendingError(null);
+      invalidate();
+    },
+    onError: (err: Error) => setPendingError(err.message),
+  });
+
   const deleteDay = useMutation({
     mutationFn: adminApi.festivalDays.delete,
-    onSuccess: invalidate,
-    onError: (err: Error) => alert(err.message),
+    onSuccess: () => {
+      setPendingError(null);
+      invalidate();
+    },
+    onError: (err: Error) => setPendingError(err.message),
   });
+
+  const handleDayClick = (date: Date) => {
+    const key = dateToString(date);
+    const existing = dayByDate.get(key);
+    if (existing) {
+      if (
+        confirm(
+          `Remove ${key} from festival? (Will fail if activities or registrations reference it.)`,
+        )
+      ) {
+        deleteDay.mutate(existing.id);
+      }
+    } else {
+      const nextSortOrder =
+        days.length > 0 ? Math.max(...days.map((d) => d.sortOrder)) + 1 : 1;
+      create.mutate({ date: key, sortOrder: nextSortOrder });
+    }
+  };
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-black mb-1">Festival Days</h1>
-          <p className="text-muted-foreground">
-            Define which dates the festival runs. Activities and registrations
-            attach to these days.
-          </p>
-        </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-primary/90"
-        >
-          <Plus className="w-4 h-4" /> Add Day
-        </button>
+      <div className="mb-8">
+        <h1 className="text-3xl font-black mb-1">Festival Days</h1>
+        <p className="text-muted-foreground">
+          Click a day to toggle. Highlighted days are part of the festival.
+        </p>
       </div>
 
-      {showAdd ? (
-        <DayForm
-          onClose={() => setShowAdd(false)}
-          onSaved={invalidate}
+      <div className="bg-card border border-border rounded-2xl p-6 mb-8 inline-block">
+        <DayPicker
+          mode="multiple"
+          selected={selectedDates}
+          onDayClick={handleDayClick}
+          showOutsideDays
+          weekStartsOn={1}
         />
+      </div>
+
+      {pendingError ? (
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive rounded-xl">
+          <p className="text-destructive">{pendingError}</p>
+        </div>
       ) : null}
+
+      <h2 className="text-xl font-bold mb-4">Days list</h2>
 
       {daysQuery.isLoading ? (
         <p className="text-muted-foreground">Loading…</p>
-      ) : daysQuery.data?.length === 0 ? (
+      ) : days.length === 0 ? (
         <p className="text-muted-foreground">
-          No festival days yet. Add one to get started.
+          No festival days yet. Click dates above to add them.
         </p>
       ) : (
         <div className="space-y-3">
-          {daysQuery.data?.map((day) =>
-            editing === day.id ? (
-              <DayForm
-                key={day.id}
-                day={day}
-                onClose={() => setEditing(null)}
-                onSaved={() => {
-                  setEditing(null);
-                  invalidate();
-                }}
-              />
-            ) : (
-              <div
-                key={day.id}
-                className="bg-card border border-border rounded-xl p-5 flex items-center justify-between gap-4"
-              >
-                <div>
-                  <p className="font-bold text-lg">
-                    {new Date(day.date + "T00:00:00").toLocaleDateString(
-                      "en-US",
-                      {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      },
-                    )}
-                  </p>
-                  {day.label ? (
-                    <p className="text-sm text-primary">{day.label}</p>
-                  ) : null}
-                  <p className="text-xs text-muted-foreground">
-                    Sort order: {day.sortOrder}
-                  </p>
+          {days
+            .slice()
+            .sort(
+              (a, b) =>
+                a.sortOrder - b.sortOrder || a.date.localeCompare(b.date),
+            )
+            .map((day) =>
+              editing === day.id ? (
+                <DayEditForm
+                  key={day.id}
+                  day={day}
+                  onClose={() => setEditing(null)}
+                  onSaved={() => {
+                    setEditing(null);
+                    invalidate();
+                  }}
+                />
+              ) : (
+                <div
+                  key={day.id}
+                  className="bg-card border border-border rounded-xl p-5 flex items-center justify-between gap-4"
+                >
+                  <div>
+                    <p className="font-bold text-lg">
+                      {new Date(day.date + "T00:00:00").toLocaleDateString(
+                        "en-US",
+                        {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        },
+                      )}
+                    </p>
+                    {day.label ? (
+                      <p className="text-sm text-primary">{day.label}</p>
+                    ) : null}
+                    <p className="text-xs text-muted-foreground">
+                      Sort order: {day.sortOrder}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setEditing(day.id)}
+                      className="p-2 hover:bg-background rounded-lg"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Delete ${day.date}?`))
+                          deleteDay.mutate(day.id);
+                      }}
+                      className="p-2 hover:bg-destructive/10 text-destructive rounded-lg"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setEditing(day.id)}
-                    className="p-2 hover:bg-background rounded-lg"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(`Delete ${day.date}?`))
-                        deleteDay.mutate(day.id);
-                    }}
-                    className="p-2 hover:bg-destructive/10 text-destructive rounded-lg"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ),
-          )}
+              ),
+            )}
         </div>
       )}
     </div>
   );
 };
 
-const DayForm = ({
+const DayEditForm = ({
   day,
   onClose,
   onSaved,
 }: {
-  day?: FestivalDayRow;
+  day: FestivalDayRow;
   onClose: () => void;
   onSaved: () => void;
 }) => {
-  const [date, setDate] = useState(day?.date ?? "");
-  const [label, setLabel] = useState(day?.label ?? "");
-  const [sortOrder, setSortOrder] = useState(String(day?.sortOrder ?? 0));
-
-  const create = useMutation({
-    mutationFn: adminApi.festivalDays.create,
-    onSuccess: () => {
-      onSaved();
-      onClose();
-    },
-    onError: (err: Error) => alert(err.message),
-  });
+  const [label, setLabel] = useState(day.label ?? "");
+  const [sortOrder, setSortOrder] = useState(String(day.sortOrder));
 
   const update = useMutation({
-    mutationFn: ({ id, ...rest }: { id: string } & Partial<FestivalDayRow>) =>
-      adminApi.festivalDays.update(id, rest),
-    onSuccess: () => {
-      onSaved();
-      onClose();
-    },
+    mutationFn: () =>
+      adminApi.festivalDays.update(day.id, {
+        label: label || null,
+        sortOrder: parseInt(sortOrder, 10) || 0,
+      }),
+    onSuccess: onSaved,
     onError: (err: Error) => alert(err.message),
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const payload = {
-      date,
-      label: label || null,
-      sortOrder: parseInt(sortOrder, 10) || 0,
-    };
-    if (day) {
-      update.mutate({ id: day.id, ...payload });
-    } else {
-      create.mutate(payload);
-    }
+    update.mutate();
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-card border-2 border-primary rounded-xl p-5 mb-3 grid md:grid-cols-4 gap-3"
+      className="bg-card border-2 border-primary rounded-xl p-5 grid md:grid-cols-3 gap-3"
     >
-      <input
-        required
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        className="px-3 py-2 bg-background border border-border rounded-lg"
-      />
+      <p className="font-bold col-span-full">{day.date}</p>
       <input
         value={label}
         onChange={(e) => setLabel(e.target.value)}
@@ -202,10 +241,10 @@ const DayForm = ({
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={create.isPending || update.isPending}
+          disabled={update.isPending}
           className="bg-primary text-primary-foreground px-3 py-2 rounded-lg font-bold flex-1"
         >
-          {day ? "Update" : "Create"}
+          Save
         </button>
         <button
           type="button"

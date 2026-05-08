@@ -66,3 +66,34 @@
     color: var(--color-foreground);
   }
 }
+
+.rdp-root {
+  --rdp-accent-color: var(--color-primary);
+  --rdp-accent-background-color: var(--color-primary);
+  --rdp-background-color: var(--color-card);
+  --rdp-day_button-height: 2.5rem;
+  --rdp-day_button-width: 2.5rem;
+  --rdp-day_button-border-radius: 0.5rem;
+  color: var(--color-foreground);
+}
+
+.rdp-day_button:hover {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  opacity: 0.6;
+}
+
+.rdp-selected .rdp-day_button {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  font-weight: 700;
+}
+
+.rdp-today .rdp-day_button {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.rdp-outside {
+  opacity: 0.4;
+}
