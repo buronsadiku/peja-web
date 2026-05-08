@@ -52,15 +52,15 @@ export const AdminRegistrationsPage = () => {
   });
 
   const datesQuery = useQuery({
-    queryKey: ["festival-dates"],
-    queryFn: () => api.activities.dates(),
+    queryKey: ["festival-days"],
+    queryFn: () => api.activities.festivalDays(),
   });
 
   const allOccurrences = occurrencesQuery.data ?? [];
   const visibleOccurrences =
     dayFilter === "all"
       ? allOccurrences
-      : allOccurrences.filter((o) => o.date === dayFilter);
+      : allOccurrences.filter((o) => o.festivalDayId === dayFilter);
 
   const registrationsQuery = useQuery({
     queryKey: [
@@ -78,7 +78,7 @@ export const AdminRegistrationsPage = () => {
         q: debouncedSearch || undefined,
         occurrenceId:
           occurrenceFilter === "all" ? undefined : occurrenceFilter,
-        date: dayFilter === "all" ? undefined : dayFilter,
+        festivalDayId: dayFilter === "all" ? undefined : dayFilter,
       }),
   });
 
@@ -150,22 +150,26 @@ export const AdminRegistrationsPage = () => {
               All days
             </button>
             {(datesQuery.data ?? []).map((d) => {
-              const active = dayFilter === d;
+              const active = dayFilter === d.id;
               return (
                 <button
-                  key={d}
-                  onClick={() => handleDayFilter(d)}
+                  key={d.id}
+                  onClick={() => handleDayFilter(d.id)}
                   className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
                     active
                       ? "bg-primary text-primary-foreground"
                       : "bg-card border border-border text-foreground hover:border-primary"
                   }`}
                 >
-                  {new Date(d + "T00:00:00").toLocaleDateString("en-US", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {d.label ??
+                    new Date(d.date + "T00:00:00").toLocaleDateString(
+                      "en-US",
+                      {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      },
+                    )}
                 </button>
               );
             })}

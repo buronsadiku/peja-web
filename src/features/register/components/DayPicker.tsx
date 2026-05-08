@@ -1,7 +1,9 @@
+import type { FestivalDay } from "@/lib/api/types";
+
 type DayPickerProps = {
-  dates: string[];
-  selected: string | null;
-  onChange: (date: string) => void;
+  days: FestivalDay[];
+  selectedId: string | null;
+  onChange: (festivalDayId: string) => void;
 };
 
 const formatDay = (date: string) => {
@@ -12,24 +14,24 @@ const formatDay = (date: string) => {
   };
 };
 
-export const DayPicker = ({ dates, selected, onChange }: DayPickerProps) => {
+export const DayPicker = ({ days, selectedId, onChange }: DayPickerProps) => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      {dates.map((date) => {
-        const { weekday, monthDay } = formatDay(date);
-        const active = selected === date;
+      {days.map((day) => {
+        const { weekday, monthDay } = formatDay(day.date);
+        const active = selectedId === day.id;
         return (
           <button
-            key={date}
+            key={day.id}
             type="button"
-            onClick={() => onChange(date)}
+            onClick={() => onChange(day.id)}
             className={`p-4 rounded-xl border-2 transition-all text-left ${
               active
                 ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/50"
                 : "bg-background border-border hover:border-primary"
             }`}
           >
-            <p className="font-bold text-lg">{weekday}</p>
+            <p className="font-bold text-lg">{day.label ?? weekday}</p>
             <p
               className={`text-sm ${
                 active ? "text-primary-foreground/80" : "text-muted-foreground"

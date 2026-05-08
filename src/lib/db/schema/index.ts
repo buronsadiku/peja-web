@@ -1,3 +1,4 @@
+export * from './festival-days';
 export * from './activity-templates';
 export * from './activity-occurrences';
 export * from './registrations';

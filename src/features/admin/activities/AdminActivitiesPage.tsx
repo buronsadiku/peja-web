@@ -42,7 +42,7 @@ export const AdminActivitiesPage = () => {
     queryClient.invalidateQueries({ queryKey: ["admin", "templates"] });
     queryClient.invalidateQueries({ queryKey: ["admin", "occurrences"] });
     queryClient.invalidateQueries({ queryKey: ["activities"] });
-    queryClient.invalidateQueries({ queryKey: ["festival-dates"] });
+    queryClient.invalidateQueries({ queryKey: ["festival-days"] });
   };
 
   const deleteTemplate = useMutation({
@@ -175,7 +175,7 @@ export const AdminActivitiesPage = () => {
                             templateId={template.id}
                             occurrence={{
                               id: o.occurrenceId,
-                              date: o.date,
+                              festivalDayId: o.festivalDayId,
                               startTime: o.startTime,
                               endTime: o.endTime,
                               capacity: o.capacity,
@@ -373,7 +373,7 @@ const OccurrenceForm = ({
   templateId: string;
   occurrence?: {
     id: string;
-    date: string;
+    festivalDayId: string;
     startTime: string;
     endTime: string;
     capacity: number;
@@ -383,7 +383,9 @@ const OccurrenceForm = ({
   onClose: () => void;
   onSaved: () => void;
 }) => {
-  const [date, setDate] = useState(occurrence?.date ?? "");
+  const [festivalDayId, setFestivalDayId] = useState(
+    occurrence?.festivalDayId ?? "",
+  );
   const [startTime, setStartTime] = useState(
     occurrence?.startTime?.slice(0, 5) ?? "",
   );
@@ -398,6 +400,11 @@ const OccurrenceForm = ({
     occurrence?.meetingPoint ?? "",
   );
 
+  const daysQuery = useQuery({
+    queryKey: ["admin", "festival-days"],
+    queryFn: adminApi.festivalDays.list,
+  });
+
   const create = useMutation({
     mutationFn: adminApi.occurrences.create,
     onSuccess: () => {
@@ -411,7 +418,7 @@ const OccurrenceForm = ({
       ...rest
     }: {
       id: string;
-      date: string;
+      festivalDayId: string;
       startTime: string;
       endTime: string;
       capacity: number;
@@ -427,7 +434,7 @@ const OccurrenceForm = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const payload = {
-      date,
+      festivalDayId,
       startTime: `${startTime}:00`,
       endTime: `${endTime}:00`,
       capacity: parseInt(capacity, 10),
@@ -447,13 +454,25 @@ const OccurrenceForm = ({
       className="bg-background border-2 border-primary rounded-xl p-4 mb-3 space-y-3"
     >
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <input
+        <select
           required
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
+          value={festivalDayId}
+          onChange={(e) => setFestivalDayId(e.target.value)}
           className="px-3 py-2 bg-card border border-border rounded-lg text-sm"
-        />
+        >
+          <option value="">Festival day…</option>
+          {(daysQuery.data ?? []).map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.label
+                ? `${d.label} (${d.date})`
+                : new Date(d.date + "T00:00:00").toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+            </option>
+          ))}
+        </select>
         <input
           required
           type="time"

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth/client";
 
 const links = [
+  { href: "/admin/festival-days", label: "Festival Days" },
   { href: "/admin/activities", label: "Activities" },
   { href: "/admin/gallery", label: "Gallery" },
   { href: "/admin/registrations", label: "Registrations" },

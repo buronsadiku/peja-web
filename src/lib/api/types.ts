@@ -5,7 +5,9 @@ export type ActivityListItem = {
   name: string;
   description: string | null;
   category: ActivityCategory;
+  festivalDayId: string;
   date: string;
+  dayLabel: string | null;
   startTime: string;
   endTime: string;
   location: string | null;
@@ -13,6 +15,13 @@ export type ActivityListItem = {
   capacity: number;
   seatsTaken: number;
   seatsLeft: number;
+};
+
+export type FestivalDay = {
+  id: string;
+  date: string;
+  label: string | null;
+  sortOrder: number;
 };
 
 export type ActivityCategory =
@@ -58,7 +67,7 @@ export type CreateRegistrationBody = {
   email: string;
   fullName: string;
   phone: string;
-  date: string;
+  festivalDayId: string;
   occurrenceIds: string[];
   responsibilityAccepted: true;
   notifyIfAbsent: boolean;
@@ -68,6 +77,7 @@ export type CreateRegistrationResponse = {
   id: string;
   email: string;
   date: string;
+  festivalDayId: string;
   activities: string[];
 };
 

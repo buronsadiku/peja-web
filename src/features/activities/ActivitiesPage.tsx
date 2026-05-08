@@ -15,30 +15,33 @@ const dayShort = (date: string) => {
 
 export const ActivitiesPage = () => {
   const [filter, setFilter] = useState("all");
+
   const activitiesQuery = useQuery({
     queryKey: ["activities"],
     queryFn: () => api.activities.list(),
   });
 
+  const daysQuery = useQuery({
+    queryKey: ["festival-days"],
+    queryFn: () => api.activities.festivalDays(),
+  });
+
   const activities = activitiesQuery.data ?? [];
-  const dates = useMemo(
-    () => Array.from(new Set(activities.map((a) => a.date))).sort(),
-    [activities],
-  );
+  const days = daysQuery.data ?? [];
 
   const filterButtons = useMemo(() => {
     const buttons = [
       { value: "all", label: "All Days", count: activities.length },
     ];
-    for (const date of dates) {
+    for (const day of days) {
       buttons.push({
-        value: date,
-        label: dayShort(date),
-        count: activities.filter((a) => a.date === date).length,
+        value: day.id,
+        label: day.label ?? dayShort(day.date),
+        count: activities.filter((a) => a.festivalDayId === day.id).length,
       });
     }
     return buttons;
-  }, [activities, dates]);
+  }, [activities, days]);
 
   return (
     <div className="pt-24 min-h-screen">
@@ -49,7 +52,7 @@ export const ActivitiesPage = () => {
           </h1>
           <div className="w-24 h-2 bg-primary mx-auto mb-8" />
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Join us for incredible experiences across all four days
+            Join us for incredible experiences across the festival
           </p>
         </div>
       </section>
@@ -72,15 +75,16 @@ export const ActivitiesPage = () => {
                 buttons={filterButtons}
               />
 
-              {dates.map((date) => {
-                if (filter !== "all" && filter !== date) return null;
+              {days.map((day) => {
+                if (filter !== "all" && filter !== day.id) return null;
                 const dayActivities = activities.filter(
-                  (a) => a.date === date,
+                  (a) => a.festivalDayId === day.id,
                 );
                 return (
                   <DaySection
-                    key={date}
-                    date={date}
+                    key={day.id}
+                    date={day.date}
+                    label={day.label}
                     activities={dayActivities}
                   />
                 );

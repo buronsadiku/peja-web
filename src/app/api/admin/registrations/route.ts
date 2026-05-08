@@ -13,6 +13,7 @@ import { db } from "@/lib/db/client";
 import {
   activityOccurrences,
   activityTemplates,
+  festivalDays,
   registrationActivities,
   registrations,
 } from "@/lib/db/schema";
@@ -30,7 +31,7 @@ export const GET = async (request: Request) => {
   );
   const q = (url.searchParams.get("q") ?? "").trim();
   const occurrenceId = url.searchParams.get("occurrenceId");
-  const date = url.searchParams.get("date");
+  const festivalDayId = url.searchParams.get("festivalDayId");
   const offset = (page - 1) * limit;
 
   const filters: SQL[] = [];
@@ -58,8 +59,8 @@ export const GET = async (request: Request) => {
       ),
     );
   }
-  if (date) {
-    filters.push(eq(registrations.date, date));
+  if (festivalDayId) {
+    filters.push(eq(registrations.festivalDayId, festivalDayId));
   }
 
   const where = filters.length ? and(...filters) : undefined;
@@ -75,7 +76,8 @@ export const GET = async (request: Request) => {
       email: registrations.email,
       fullName: registrations.fullName,
       phone: registrations.phone,
-      date: registrations.date,
+      festivalDayId: registrations.festivalDayId,
+      date: festivalDays.date,
       responsibilityAccepted: registrations.responsibilityAccepted,
       notifyIfAbsent: registrations.notifyIfAbsent,
       createdAt: registrations.createdAt,
@@ -94,6 +96,10 @@ export const GET = async (request: Request) => {
         )`.as("activities"),
     })
     .from(registrations)
+    .innerJoin(
+      festivalDays,
+      eq(festivalDays.id, registrations.festivalDayId),
+    )
     .leftJoin(
       registrationActivities,
       eq(registrationActivities.registrationId, registrations.id),
@@ -107,7 +113,7 @@ export const GET = async (request: Request) => {
       eq(activityTemplates.id, activityOccurrences.templateId),
     )
     .where(where)
-    .groupBy(registrations.id)
+    .groupBy(registrations.id, festivalDays.date)
     .orderBy(desc(registrations.createdAt))
     .limit(limit)
     .offset(offset);

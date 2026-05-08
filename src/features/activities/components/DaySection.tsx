@@ -3,6 +3,7 @@ import { ActivityCard } from "./ActivityCard";
 
 type DaySectionProps = {
   date: string;
+  label: string | null;
   activities: ActivityListItem[];
 };
 
@@ -17,12 +18,10 @@ const formatDateLabel = (date: string) => {
 
 const dayName = (date: string) => {
   const d = new Date(date + "T00:00:00");
-  return d
-    .toLocaleDateString("en-US", { weekday: "long" })
-    .toUpperCase();
+  return d.toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
 };
 
-export const DaySection = ({ date, activities }: DaySectionProps) => {
+export const DaySection = ({ date, label, activities }: DaySectionProps) => {
   if (activities.length === 0) return null;
 
   return (
@@ -30,7 +29,7 @@ export const DaySection = ({ date, activities }: DaySectionProps) => {
       <div className="flex items-center gap-4 mb-8">
         <div className="flex-1 h-px bg-border" />
         <h2 className="text-4xl md:text-5xl font-black text-primary">
-          {dayName(date)}
+          {label ?? dayName(date)}
         </h2>
         <div className="flex-1 h-px bg-border" />
       </div>

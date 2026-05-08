@@ -3,6 +3,7 @@ import type {
   ApiError,
   CreateRegistrationBody,
   CreateRegistrationResponse,
+  FestivalDay,
   GalleryListResponse,
   GallerySection,
   RegistrationLookup,
@@ -49,12 +50,16 @@ const request = async <T>(
 
 export const api = {
   activities: {
-    list: (date?: string) =>
+    list: (festivalDayId?: string) =>
       request<{ data: ActivityListItem[] }>(
-        date ? `/v1/activities?date=${date}` : "/v1/activities",
+        festivalDayId
+          ? `/v1/activities?festivalDayId=${festivalDayId}`
+          : "/v1/activities",
       ).then((r) => r.data),
-    dates: () =>
-      request<{ data: string[] }>("/v1/activities/dates").then((r) => r.data),
+    festivalDays: () =>
+      request<{ data: FestivalDay[] }>("/v1/activities/festival-days").then(
+        (r) => r.data,
+      ),
   },
   gallery: {
     list: (params: {

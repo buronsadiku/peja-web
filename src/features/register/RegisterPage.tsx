@@ -12,7 +12,7 @@ type FormState = {
   email: string;
   fullName: string;
   phone: string;
-  date: string | null;
+  festivalDayId: string | null;
   selectedIds: Set<string>;
   responsibilityAccepted: boolean;
   notifyIfAbsent: boolean;
@@ -23,7 +23,7 @@ const initialForm: FormState = {
   email: "",
   fullName: "",
   phone: "",
-  date: null,
+  festivalDayId: null,
   selectedIds: new Set(),
   responsibilityAccepted: false,
   notifyIfAbsent: false,
@@ -40,14 +40,14 @@ export const RegisterPage = () => {
   const lookupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const datesQuery = useQuery({
-    queryKey: ["festival-dates"],
-    queryFn: () => api.activities.dates(),
+    queryKey: ["festival-days"],
+    queryFn: () => api.activities.festivalDays(),
   });
 
   const activitiesQuery = useQuery({
-    queryKey: ["activities", form.date],
-    queryFn: () => api.activities.list(form.date ?? undefined),
-    enabled: !!form.date,
+    queryKey: ["activities", form.festivalDayId],
+    queryFn: () => api.activities.list(form.festivalDayId ?? undefined),
+    enabled: !!form.festivalDayId,
   });
 
   const lookupMutation = useMutation({
@@ -96,8 +96,12 @@ export const RegisterPage = () => {
     }, 100);
   };
 
-  const onSelectDate = (date: string) => {
-    setForm((prev) => ({ ...prev, date, selectedIds: new Set() }));
+  const onSelectDay = (festivalDayId: string) => {
+    setForm((prev) => ({
+      ...prev,
+      festivalDayId,
+      selectedIds: new Set(),
+    }));
   };
 
   const toggleActivity = (id: string, next: boolean) => {
@@ -112,7 +116,7 @@ export const RegisterPage = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (
-      !form.date ||
+      !form.festivalDayId ||
       !form.responsibilityAccepted ||
       !form.commitmentAccepted ||
       form.selectedIds.size === 0
@@ -123,7 +127,7 @@ export const RegisterPage = () => {
       email: form.email,
       fullName: form.fullName,
       phone: form.phone,
-      date: form.date,
+      festivalDayId: form.festivalDayId,
       occurrenceIds: Array.from(form.selectedIds),
       responsibilityAccepted: true,
       notifyIfAbsent: form.notifyIfAbsent,
@@ -201,9 +205,9 @@ export const RegisterPage = () => {
             ) : (
               <div className="mb-10">
                 <DayPicker
-                  dates={datesQuery.data ?? []}
-                  selected={form.date}
-                  onChange={onSelectDate}
+                  days={datesQuery.data ?? []}
+                  selectedId={form.festivalDayId}
+                  onChange={onSelectDay}
                 />
               </div>
             )}
@@ -265,7 +269,7 @@ export const RegisterPage = () => {
 
             <div className="border-t border-border pt-8 mb-8">
               <h2 className="text-3xl font-black mb-6">3. Select Activities</h2>
-              {!form.date ? (
+              {!form.festivalDayId ? (
                 <p className="text-muted-foreground">
                   Pick a day above to see activities.
                 </p>
@@ -375,7 +379,7 @@ export const RegisterPage = () => {
               type="submit"
               disabled={
                 submitMutation.isPending ||
-                !form.date ||
+                !form.festivalDayId ||
                 form.selectedIds.size === 0 ||
                 !form.responsibilityAccepted ||
                 !form.commitmentAccepted

@@ -74,6 +74,24 @@ export const adminApi = {
     delete: (id: string) =>
       request<void>(`/api/admin/gallery/${id}`, { method: "DELETE" }),
   },
+  festivalDays: {
+    list: () =>
+      request<{ data: FestivalDayRow[] }>("/api/admin/festival-days").then(
+        (r) => r.data,
+      ),
+    create: (body: FestivalDayInput) =>
+      request<{ data: FestivalDayRow }>("/api/admin/festival-days", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }).then((r) => r.data),
+    update: (id: string, body: Partial<FestivalDayInput>) =>
+      request<{ data: FestivalDayRow }>(`/api/admin/festival-days/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      }).then((r) => r.data),
+    delete: (id: string) =>
+      request<void>(`/api/admin/festival-days/${id}`, { method: "DELETE" }),
+  },
   uploadImage: async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append("file", file);
@@ -94,7 +112,7 @@ export const adminApi = {
       limit?: number;
       q?: string;
       occurrenceId?: string;
-      date?: string;
+      festivalDayId?: string;
     }) => {
       const search = new URLSearchParams();
       if (params?.page) search.set("page", String(params.page));
@@ -102,7 +120,8 @@ export const adminApi = {
       if (params?.q) search.set("q", params.q);
       if (params?.occurrenceId)
         search.set("occurrenceId", params.occurrenceId);
-      if (params?.date) search.set("date", params.date);
+      if (params?.festivalDayId)
+        search.set("festivalDayId", params.festivalDayId);
       const qs = search.toString();
       return request<PaginatedResponse<RegistrationRow>>(
         `/api/admin/registrations${qs ? `?${qs}` : ""}`,
@@ -156,7 +175,7 @@ export type TemplateInput = {
 export type OccurrenceRow = {
   id: string;
   templateId: string;
-  date: string;
+  festivalDayId: string;
   startTime: string;
   endTime: string;
   capacity: number;
@@ -168,12 +187,27 @@ export type OccurrenceRow = {
 
 export type OccurrenceInput = {
   templateId: string;
-  date: string;
+  festivalDayId: string;
   startTime: string;
   endTime: string;
   capacity: number;
   location?: string | null;
   meetingPoint?: string | null;
+};
+
+export type FestivalDayRow = {
+  id: string;
+  date: string;
+  label: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type FestivalDayInput = {
+  date: string;
+  label?: string | null;
+  sortOrder?: number;
 };
 
 export type GallerySection = "live" | "workshops" | "adventures" | "food";
@@ -204,6 +238,7 @@ export type RegistrationRow = {
   email: string;
   fullName: string;
   phone: string;
+  festivalDayId: string;
   date: string;
   responsibilityAccepted: boolean;
   notifyIfAbsent: boolean;

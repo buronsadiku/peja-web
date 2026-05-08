@@ -6,7 +6,7 @@ import { requireAdminApi } from "@/lib/auth/api-guard";
 
 const createSchema = z.object({
   templateId: z.string().uuid(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  festivalDayId: z.string().uuid(),
   startTime: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
   endTime: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
   capacity: z.number().int().min(0),
