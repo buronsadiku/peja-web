@@ -6,7 +6,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Plus, Trash2, Upload } from "lucide-react";
+import { Images, Plus, Trash2, Upload } from "lucide-react";
 import {
   adminApi,
   type GalleryRow,
@@ -21,6 +21,7 @@ const sections: GallerySection[] = ["live", "workshops", "adventures", "food"];
 export const AdminGalleryPage = () => {
   const queryClient = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
   const [page, setPage] = useState(1);
 
   const galleryQuery = useQuery({
@@ -50,16 +51,31 @@ export const AdminGalleryPage = () => {
             Manage festival photos by section.
           </p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-primary/90"
-        >
-          <Plus className="w-4 h-4" /> Add Image
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowBulk(true)}
+            className="bg-card border border-border text-foreground px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:border-primary"
+          >
+            <Images className="w-4 h-4" /> Bulk Upload
+          </button>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-primary/90"
+          >
+            <Plus className="w-4 h-4" /> Add Image
+          </button>
+        </div>
       </div>
 
       {showAdd ? (
         <GalleryForm onClose={() => setShowAdd(false)} onSaved={invalidate} />
+      ) : null}
+
+      {showBulk ? (
+        <BulkUploadForm
+          onClose={() => setShowBulk(false)}
+          onSaved={invalidate}
+        />
       ) : null}
 
       {galleryQuery.isLoading ? (
@@ -327,5 +343,168 @@ const GalleryForm = ({
         </button>
       </div>
     </form>
+  );
+};
+
+type BulkFile = {
+  file: File;
+  status: "pending" | "uploading" | "done" | "error";
+  error?: string;
+};
+
+const BulkUploadForm = ({
+  onClose,
+  onSaved,
+}: {
+  onClose: () => void;
+  onSaved: () => void;
+}) => {
+  const [files, setFiles] = useState<BulkFile[]>([]);
+  const [section, setSection] = useState<GallerySection>("live");
+  const [running, setRunning] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files ?? []).filter((f) =>
+      f.type.startsWith("image/"),
+    );
+    setFiles(picked.map((file) => ({ file, status: "pending" })));
+  };
+
+  const startUpload = async () => {
+    if (files.length === 0 || running) return;
+    setRunning(true);
+
+    for (let i = 0; i < files.length; i++) {
+      setFiles((prev) =>
+        prev.map((f, idx) => (idx === i ? { ...f, status: "uploading" } : f)),
+      );
+      try {
+        const url = await adminApi.uploadImage(files[i].file);
+        await adminApi.gallery.create({
+          url,
+          alt: files[i].file.name.replace(/\.[^.]+$/, ""),
+          section,
+          sortOrder: Date.now() + i,
+        });
+        setFiles((prev) =>
+          prev.map((f, idx) => (idx === i ? { ...f, status: "done" } : f)),
+        );
+      } catch (err) {
+        setFiles((prev) =>
+          prev.map((f, idx) =>
+            idx === i
+              ? {
+                  ...f,
+                  status: "error",
+                  error: err instanceof Error ? err.message : String(err),
+                }
+              : f,
+          ),
+        );
+      }
+    }
+
+    setRunning(false);
+    onSaved();
+  };
+
+  const allDone = files.length > 0 && files.every((f) => f.status === "done");
+  const anyError = files.some((f) => f.status === "error");
+  const doneCount = files.filter((f) => f.status === "done").length;
+
+  return (
+    <div className="bg-card border-2 border-primary rounded-xl p-6 mb-6">
+      <h2 className="text-xl font-bold mb-4">Bulk upload</h2>
+
+      <div className="grid md:grid-cols-2 gap-3 mb-4">
+        <select
+          value={section}
+          onChange={(e) => setSection(e.target.value as GallerySection)}
+          disabled={running}
+          className="px-4 py-2 bg-background border border-border rounded-lg disabled:opacity-50"
+        >
+          {sections.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={onPick}
+          disabled={running}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={running}
+          className="bg-primary/10 border-2 border-dashed border-primary text-primary px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-primary/20 disabled:opacity-50"
+        >
+          <Upload className="w-4 h-4" />
+          {files.length > 0 ? `${files.length} files selected` : "Pick images"}
+        </button>
+      </div>
+
+      {files.length > 0 ? (
+        <div className="bg-background border border-border rounded-lg max-h-80 overflow-y-auto">
+          {files.map((f, idx) => (
+            <div
+              key={idx}
+              className="flex items-center justify-between px-4 py-2 border-b border-border last:border-0"
+            >
+              <span className="text-sm truncate flex-1">{f.file.name}</span>
+              <span
+                className={`text-xs font-bold uppercase ml-3 ${
+                  f.status === "done"
+                    ? "text-primary"
+                    : f.status === "error"
+                      ? "text-destructive"
+                      : f.status === "uploading"
+                        ? "text-primary animate-pulse"
+                        : "text-muted-foreground"
+                }`}
+              >
+                {f.status === "error" ? f.error ?? "error" : f.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="flex items-center justify-between mt-4">
+        <p className="text-sm text-muted-foreground">
+          {running
+            ? `Uploading ${doneCount}/${files.length}…`
+            : allDone
+              ? `Uploaded ${doneCount}${anyError ? " (some failed)" : ""}.`
+              : files.length > 0
+                ? `${files.length} ready`
+                : "Pick files to upload."}
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={startUpload}
+            disabled={files.length === 0 || running || allDone}
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {running ? "Uploading…" : allDone ? "Done" : "Start upload"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={running}
+            className="bg-background border border-border px-4 py-2 rounded-lg disabled:opacity-50"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
