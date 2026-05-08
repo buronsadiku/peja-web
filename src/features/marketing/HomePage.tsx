@@ -1,0 +1,17 @@
+import { CtaSection } from "./components/CtaSection";
+import { HeadlinersSection } from "./components/HeadlinersSection";
+import { HeroSection } from "./components/HeroSection";
+import { MemoriesSection } from "./components/MemoriesSection";
+import { QuickInfoSection } from "./components/QuickInfoSection";
+
+export const HomePage = () => {
+  return (
+    <>
+      <HeroSection />
+      <QuickInfoSection />
+      <HeadlinersSection />
+      <MemoriesSection />
+      <CtaSection />
+    </>
+  );
+};

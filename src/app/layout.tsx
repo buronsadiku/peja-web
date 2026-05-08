@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Peja — Capture Your Wedding Messages",
+  title: "Peja Outdoor Festival — June 18-21, 2026",
   description:
-    "Let your guests leave audio messages, photos, and notes — and turn them into beautiful keepsakes.",
+    "Four days of incredible activities and music in the heart of Kosovo. Free entry, registration required.",
 };
 
 const RootLayout = ({

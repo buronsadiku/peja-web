@@ -16,7 +16,7 @@
   "dependencies": {
     "@vidstack/react": "^1.12.13",
     "date-fns": "^4.1.0",
-    "lucide-react": "^1.8.0",
+    "lucide-react": "^0.487.0",
     "radix-ui": "^1.4.3",
     "react-day-picker": "^9.14.0"
   }

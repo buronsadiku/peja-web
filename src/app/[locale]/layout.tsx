@@ -3,6 +3,8 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { SiteNav } from "@/features/layout/SiteNav";
+import { SiteFooter } from "@/features/layout/SiteFooter";
 
 const rubik = Rubik({
   subsets: ["latin"],
@@ -39,12 +41,14 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${rubik.variable} ${notoSans.variable} h-dvh antialiased`}
+      className={`${rubik.variable} ${notoSans.variable} antialiased`}
       suppressHydrationWarning
     >
-      <body className="font-sans flex max-h-dvh flex-1 flex-col">
+      <body className="font-sans bg-background text-foreground min-h-screen">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <SiteNav />
+          <main>{children}</main>
+          <SiteFooter />
         </NextIntlClientProvider>
       </body>
     </html>

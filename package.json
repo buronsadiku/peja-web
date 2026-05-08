@@ -23,6 +23,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "fflate": "^0.8.2",
+    "lucide-react": "^0.487.0",
     "next": "16.2.4",
     "next-intl": "^4.9.1",
     "pg": "^8.20.0",
