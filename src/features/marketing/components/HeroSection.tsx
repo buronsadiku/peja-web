@@ -14,7 +14,7 @@ export const HeroSection = () => {
           alt="Festival crowd at sunset"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-background/60" />
       </div>
 
       <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
@@ -25,15 +25,15 @@ export const HeroSection = () => {
           </div>
         </div>
 
-        <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-6 text-white leading-none">
+        <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-6 text-foreground leading-none drop-shadow-lg">
           PEJA
           <br />
           <span className="text-primary">OUTDOOR</span>
           <br />
-          <span className="text-white">FESTIVAL</span>
+          <span className="text-foreground">FESTIVAL</span>
         </h1>
 
-        <p className="text-xl md:text-2xl mb-6 text-gray-300 max-w-2xl mx-auto">
+        <p className="text-xl md:text-2xl mb-6 text-muted-foreground max-w-2xl mx-auto">
           Four days of incredible activities and music in the heart of Kosovo
         </p>
 
@@ -51,7 +51,7 @@ export const HeroSection = () => {
           </Link>
           <Link
             href="/activities"
-            className="bg-white/10 backdrop-blur-sm text-white border-2 border-white/50 px-10 py-5 rounded-full text-lg hover:bg-white/20 transition-all text-center"
+            className="bg-foreground/10 backdrop-blur-sm text-foreground border-2 border-foreground/50 px-10 py-5 rounded-full text-lg hover:bg-foreground/20 transition-all text-center"
           >
             View Activities
           </Link>

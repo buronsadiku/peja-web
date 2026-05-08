@@ -52,7 +52,7 @@ export const Countdown = () => {
           <p className="text-3xl md:text-5xl font-black text-primary leading-none tabular-nums">
             {String(c.value).padStart(2, "0")}
           </p>
-          <p className="text-xs uppercase text-white/70 tracking-wider mt-1">
+          <p className="text-xs uppercase text-foreground/70 tracking-wider mt-1">
             {c.label}
           </p>
         </div>
