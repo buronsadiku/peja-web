@@ -23,7 +23,7 @@ const dateToString = (d: Date) => {
 
 const stringToDate = (s: string) => {
   const [y, m, d] = s.split("-").map(Number);
-  return new Date(y, m - 1, d);
+  return new Date(y, m - 1, d, 12, 0, 0);
 };
 
 export const AdminFestivalDaysPage = () => {
@@ -110,13 +110,19 @@ export const AdminFestivalDaysPage = () => {
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-6 mb-8 inline-block">
-        <DayPicker
-          mode="multiple"
-          selected={selectedDates}
-          onDayClick={handleDayClick}
-          showOutsideDays
-          weekStartsOn={1}
-        />
+        {daysQuery.isLoading ? (
+          <p className="text-muted-foreground">Loading calendar…</p>
+        ) : (
+          <DayPicker
+            key={selectedDates[0]?.toISOString() ?? "empty"}
+            mode="multiple"
+            selected={selectedDates}
+            onDayClick={handleDayClick}
+            defaultMonth={selectedDates[0] ?? new Date()}
+            showOutsideDays
+            weekStartsOn={1}
+          />
+        )}
       </div>
 
       {pendingError ? (
