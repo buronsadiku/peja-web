@@ -14,7 +14,7 @@ import {
 } from "../lib/admin-api";
 import { Pagination } from "../components/Pagination";
 
-const PAGE_LIMIT = 30;
+const PAGE_LIMIT = 20;
 
 const sections: GallerySection[] = ["live", "workshops", "adventures", "food"];
 

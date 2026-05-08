@@ -3,7 +3,7 @@ import type {
   ApiError,
   CreateRegistrationBody,
   CreateRegistrationResponse,
-  GalleryImage,
+  GalleryListResponse,
   GallerySection,
   RegistrationLookup,
 } from "./types";
@@ -57,10 +57,20 @@ export const api = {
       request<{ data: string[] }>("/v1/activities/dates").then((r) => r.data),
   },
   gallery: {
-    list: (section?: GallerySection) =>
-      request<{ data: GalleryImage[] }>(
-        section ? `/v1/gallery?section=${section}` : "/v1/gallery",
-      ).then((r) => r.data),
+    list: (params: {
+      section?: GallerySection;
+      page?: number;
+      limit?: number;
+    } = {}) => {
+      const search = new URLSearchParams();
+      if (params.section) search.set("section", params.section);
+      if (params.page) search.set("page", String(params.page));
+      if (params.limit) search.set("limit", String(params.limit));
+      const qs = search.toString();
+      return request<GalleryListResponse>(
+        `/v1/gallery${qs ? `?${qs}` : ""}`,
+      );
+    },
   },
   registrations: {
     create: (body: CreateRegistrationBody) =>

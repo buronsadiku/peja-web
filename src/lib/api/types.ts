@@ -37,6 +37,18 @@ export type GalleryImage = {
   updatedAt: string;
 };
 
+export type Pagination = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+export type GalleryListResponse = {
+  data: GalleryImage[];
+  pagination: Pagination;
+};
+
 export type RegistrationLookup = {
   fullName: string;
   phone: string;

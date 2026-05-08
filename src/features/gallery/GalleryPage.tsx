@@ -1,40 +1,97 @@
 "use client";
 
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { api } from "@/lib/api/client";
-import type { GallerySection as Section } from "@/lib/api/types";
-import { GallerySection } from "./components/GallerySection";
+import type {
+  GalleryImage,
+  GallerySection as Section,
+} from "@/lib/api/types";
+import { GalleryItem } from "./components/GalleryItem";
+import { Lightbox } from "./components/Lightbox";
+import {
+  SectionFilterBar,
+  type SectionFilter,
+} from "./components/SectionFilterBar";
 
-const sectionTitles: Record<Section, string> = {
-  live: "Live Performances",
-  workshops: "Workshops & Activities",
-  adventures: "Mountain Adventures",
-  food: "Food & Wine Tasting",
-};
+const PAGE_LIMIT = 30;
 
-const sectionOrder: Section[] = ["live", "workshops", "adventures", "food"];
+const sections: Section[] = ["live", "workshops", "adventures", "food"];
 
 export const GalleryPage = () => {
-  const galleryQuery = useQuery({
-    queryKey: ["gallery"],
-    queryFn: () => api.gallery.list(),
+  const [filter, setFilter] = useState<SectionFilter>("all");
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  const galleryQuery = useInfiniteQuery({
+    queryKey: ["gallery", "infinite", filter],
+    queryFn: ({ pageParam }) =>
+      api.gallery.list({
+        section: filter === "all" ? undefined : filter,
+        page: pageParam,
+        limit: PAGE_LIMIT,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
   });
 
-  const grouped = useMemo(() => {
-    const map: Record<Section, typeof galleryQuery.data> = {
-      live: [],
-      workshops: [],
-      adventures: [],
-      food: [],
-    };
-    for (const item of galleryQuery.data ?? []) {
-      map[item.section]?.push(item);
-    }
-    return map;
-  }, [galleryQuery.data]);
+  const items = useMemo<GalleryImage[]>(
+    () => galleryQuery.data?.pages.flatMap((p) => p.data) ?? [],
+    [galleryQuery.data],
+  );
+
+  const total = galleryQuery.data?.pages[0]?.pagination.total ?? 0;
+
+  const countsQueries = useQuery({
+    queryKey: ["gallery", "counts"],
+    queryFn: async () => {
+      const all = await api.gallery.list({ limit: 1, page: 1 });
+      const perSection = await Promise.all(
+        sections.map(async (s) => {
+          const res = await api.gallery.list({
+            section: s,
+            limit: 1,
+            page: 1,
+          });
+          return [s, res.pagination.total] as const;
+        }),
+      );
+      return {
+        all: all.pagination.total,
+        ...Object.fromEntries(perSection),
+      } as Record<SectionFilter, number>;
+    },
+  });
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0]?.isIntersecting &&
+          galleryQuery.hasNextPage &&
+          !galleryQuery.isFetchingNextPage
+        ) {
+          galleryQuery.fetchNextPage();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [galleryQuery]);
+
+  const handleOpen = (entry: GalleryImage) => {
+    const idx = items.findIndex((i) => i.id === entry.id);
+    if (idx >= 0) setLightboxIndex(idx);
+  };
 
   return (
     <div className="pt-24 min-h-screen bg-background">
@@ -52,6 +109,12 @@ export const GalleryPage = () => {
 
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
+          <SectionFilterBar
+            filter={filter}
+            onChange={setFilter}
+            counts={(countsQueries.data ?? {}) as Record<SectionFilter, number>}
+          />
+
           {galleryQuery.isLoading ? (
             <p className="text-center text-muted-foreground">
               Loading gallery…
@@ -60,14 +123,34 @@ export const GalleryPage = () => {
             <p className="text-center text-destructive">
               Failed to load gallery.
             </p>
+          ) : items.length === 0 ? (
+            <p className="text-center text-muted-foreground">
+              No photos in this section yet.
+            </p>
           ) : (
-            sectionOrder.map((section) => (
-              <GallerySection
-                key={section}
-                title={sectionTitles[section]}
-                entries={grouped[section] ?? []}
-              />
-            ))
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {items.map((entry) => (
+                  <GalleryItem
+                    key={entry.id}
+                    entry={entry}
+                    onClick={() => handleOpen(entry)}
+                  />
+                ))}
+              </div>
+
+              <div ref={sentinelRef} className="h-10" />
+
+              {galleryQuery.isFetchingNextPage ? (
+                <p className="text-center text-muted-foreground py-8">
+                  Loading more…
+                </p>
+              ) : !galleryQuery.hasNextPage && items.length > 0 ? (
+                <p className="text-center text-muted-foreground py-8 text-sm">
+                  Showing all {total} photos
+                </p>
+              ) : null}
+            </>
           )}
         </div>
       </section>
@@ -89,6 +172,15 @@ export const GalleryPage = () => {
           </Link>
         </div>
       </section>
+
+      {lightboxIndex !== null ? (
+        <Lightbox
+          images={items}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={setLightboxIndex}
+        />
+      ) : null}
     </div>
   );
 };
