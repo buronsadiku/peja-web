@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { Pencil, Search, Trash2, X } from "lucide-react";
+import { api } from "@/lib/api/client";
 import {
   adminApi,
   type RegistrationRow,
@@ -15,12 +16,22 @@ import { Pagination } from "../components/Pagination";
 
 const PAGE_LIMIT = 100;
 
+const formatDate = (date: string) => {
+  const d = new Date(date + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+};
+
+const formatTime = (t: string) => t.slice(0, 5);
+
 export const AdminRegistrationsPage = () => {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [occurrenceFilter, setOccurrenceFilter] = useState<string | "all">(
+    "all",
+  );
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -34,15 +45,33 @@ export const AdminRegistrationsPage = () => {
     };
   }, [searchInput]);
 
+  const occurrencesQuery = useQuery({
+    queryKey: ["activities"],
+    queryFn: () => api.activities.list(),
+  });
+
   const registrationsQuery = useQuery({
-    queryKey: ["admin", "registrations", page, debouncedSearch],
+    queryKey: [
+      "admin",
+      "registrations",
+      page,
+      debouncedSearch,
+      occurrenceFilter,
+    ],
     queryFn: () =>
       adminApi.registrations.list({
         page,
         limit: PAGE_LIMIT,
         q: debouncedSearch || undefined,
+        occurrenceId:
+          occurrenceFilter === "all" ? undefined : occurrenceFilter,
       }),
   });
+
+  const handleFilter = (next: string | "all") => {
+    setOccurrenceFilter(next);
+    setPage(1);
+  };
 
   const rows = registrationsQuery.data?.data ?? [];
   const pagination = registrationsQuery.data?.pagination;
@@ -66,7 +95,7 @@ export const AdminRegistrationsPage = () => {
         </p>
       </div>
 
-      <div className="relative mb-6">
+      <div className="relative mb-4">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="search"
@@ -84,6 +113,38 @@ export const AdminRegistrationsPage = () => {
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         ) : null}
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-6">
+        <button
+          onClick={() => handleFilter("all")}
+          className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+            occurrenceFilter === "all"
+              ? "bg-primary text-primary-foreground"
+              : "bg-card border border-border text-foreground hover:border-primary"
+          }`}
+        >
+          All
+        </button>
+        {(occurrencesQuery.data ?? []).map((o) => {
+          const active = occurrenceFilter === o.occurrenceId;
+          return (
+            <button
+              key={o.occurrenceId}
+              onClick={() => handleFilter(o.occurrenceId)}
+              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                active
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-card border border-border text-foreground hover:border-primary"
+              }`}
+            >
+              {o.name}
+              <span className="ml-1.5 opacity-70 font-normal">
+                {formatDate(o.date)} · {formatTime(o.startTime)}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {registrationsQuery.isLoading ? (

@@ -1,5 +1,14 @@
 import { NextResponse } from "next/server";
-import { and, desc, eq, ilike, or, sql, type SQL } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  exists,
+  ilike,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   activityOccurrences,
@@ -20,6 +29,7 @@ export const GET = async (request: Request) => {
     Math.max(1, parseInt(url.searchParams.get("limit") ?? "100", 10)),
   );
   const q = (url.searchParams.get("q") ?? "").trim();
+  const occurrenceId = url.searchParams.get("occurrenceId");
   const offset = (page - 1) * limit;
 
   const filters: SQL[] = [];
@@ -31,6 +41,21 @@ export const GET = async (request: Request) => {
       ilike(registrations.phone, like),
     );
     if (orCondition) filters.push(orCondition);
+  }
+  if (occurrenceId) {
+    filters.push(
+      exists(
+        db
+          .select({ one: sql`1` })
+          .from(registrationActivities)
+          .where(
+            and(
+              eq(registrationActivities.registrationId, registrations.id),
+              eq(registrationActivities.occurrenceId, occurrenceId),
+            ),
+          ),
+      ),
+    );
   }
 
   const where = filters.length ? and(...filters) : undefined;

@@ -89,11 +89,18 @@ export const adminApi = {
     return json.data.publicUrl;
   },
   registrations: {
-    list: (params?: { page?: number; limit?: number; q?: string }) => {
+    list: (params?: {
+      page?: number;
+      limit?: number;
+      q?: string;
+      occurrenceId?: string;
+    }) => {
       const search = new URLSearchParams();
       if (params?.page) search.set("page", String(params.page));
       if (params?.limit) search.set("limit", String(params.limit));
       if (params?.q) search.set("q", params.q);
+      if (params?.occurrenceId)
+        search.set("occurrenceId", params.occurrenceId);
       const qs = search.toString();
       return request<PaginatedResponse<RegistrationRow>>(
         `/api/admin/registrations${qs ? `?${qs}` : ""}`,
