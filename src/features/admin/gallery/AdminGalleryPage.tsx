@@ -384,7 +384,7 @@ const BulkUploadForm = ({
           url,
           alt: files[i].file.name.replace(/\.[^.]+$/, ""),
           section,
-          sortOrder: Date.now() + i,
+          sortOrder: i,
         });
         setFiles((prev) =>
           prev.map((f, idx) => (idx === i ? { ...f, status: "done" } : f)),
