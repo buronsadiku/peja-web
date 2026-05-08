@@ -33,17 +33,18 @@ export const Countdown = () => {
     return () => clearInterval(i);
   }, [startDate]);
 
-  if (!startDate || !time) return null;
-
+  const ready = !!startDate && !!time;
   const cells = [
-    { value: time.days, label: "Days" },
-    { value: time.hours, label: "Hours" },
-    { value: time.minutes, label: "Min" },
-    { value: time.seconds, label: "Sec" },
+    { value: time?.days ?? 0, label: "Days" },
+    { value: time?.hours ?? 0, label: "Hours" },
+    { value: time?.minutes ?? 0, label: "Min" },
+    { value: time?.seconds ?? 0, label: "Sec" },
   ];
 
   return (
-    <div className="flex justify-center gap-3 md:gap-6 mt-6">
+    <div
+      className={`flex justify-center gap-3 md:gap-6 mt-6 transition-opacity ${ready ? "opacity-100" : "opacity-0"}`}
+    >
       {cells.map((c) => (
         <div
           key={c.label}
