@@ -1,0 +1,23 @@
+{
+  "name": "@peja/ui",
+  "version": "0.0.1",
+  "private": true,
+  "sideEffects": false,
+  "exports": {
+    "./components/*": "./src/components/*.tsx",
+    "./providers/*": "./src/providers/*.tsx",
+    "./utils/*": "./src/utils/*.ts",
+    "./hooks/*": "./src/hooks/*.ts"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@vidstack/react": "^1.12.13",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^1.8.0",
+    "radix-ui": "^1.4.3",
+    "react-day-picker": "^9.14.0"
+  }
+}

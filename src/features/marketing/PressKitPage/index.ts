@@ -1,0 +1,1 @@
+export { PressKitPage } from "./PressKitPage";

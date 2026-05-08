@@ -1,0 +1,1 @@
+export { HeroShowpiece } from "./HeroShowpiece";

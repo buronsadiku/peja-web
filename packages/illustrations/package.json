@@ -1,0 +1,12 @@
+{
+  "name": "@peja/illustrations",
+  "version": "0.0.1",
+  "private": true,
+  "sideEffects": false,
+  "exports": {
+    "./*": "./src/*.tsx"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

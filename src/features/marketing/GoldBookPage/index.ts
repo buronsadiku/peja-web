@@ -1,0 +1,1 @@
+export { GoldBookPage } from "./GoldBookPage";
