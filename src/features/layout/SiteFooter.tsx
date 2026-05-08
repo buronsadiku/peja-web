@@ -55,6 +55,12 @@ export const SiteFooter = () => {
                   Activities
                 </Link>
                 <Link
+                  href="/news"
+                  className="block text-muted-foreground hover:text-primary transition-colors"
+                >
+                  News
+                </Link>
+                <Link
                   href="/gallery"
                   className="block text-muted-foreground hover:text-primary transition-colors"
                 >

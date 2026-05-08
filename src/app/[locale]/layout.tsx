@@ -45,6 +45,13 @@ export default async function LocaleLayout({
       className={`${rubik.variable} ${notoSans.variable} antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('peja-theme');if(t==='light')document.documentElement.classList.add('light');}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body className="font-sans bg-background text-foreground min-h-screen">
         <NextIntlClientProvider messages={messages}>
           <Providers>

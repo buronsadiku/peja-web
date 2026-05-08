@@ -1,4 +1,5 @@
 import { Clock, MapPin, Users } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import type { ActivityListItem } from "@/lib/api/types";
 
 export const ActivityCard = ({
@@ -8,27 +9,50 @@ export const ActivityCard = ({
 }) => {
   const isFull = activity.seatsLeft <= 0;
   return (
-    <div
-      className={`bg-card border rounded-2xl overflow-hidden transition-all group ${
+    <Link
+      href={`/activities/${activity.slug}`}
+      className={`block bg-card border rounded-2xl overflow-hidden transition-all group ${
         isFull
           ? "border-border opacity-60"
           : "border-border hover:border-primary hover:shadow-lg hover:shadow-primary/20"
       }`}
     >
+      {activity.coverImageUrl ? (
+        <div className="relative h-48 overflow-hidden">
+          <img
+            src={activity.coverImageUrl}
+            alt={activity.name}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          />
+          <div className="absolute top-3 right-3">
+            <span
+              className={`text-xs font-bold uppercase px-3 py-1 rounded-full backdrop-blur ${
+                isFull
+                  ? "bg-destructive/80 text-destructive-foreground"
+                  : "bg-primary/90 text-primary-foreground"
+              }`}
+            >
+              {isFull ? "Full" : `${activity.seatsLeft}/${activity.capacity}`}
+            </span>
+          </div>
+        </div>
+      ) : null}
       <div className="p-6">
         <div className="flex items-start justify-between gap-3 mb-3">
           <h3 className="text-2xl font-black group-hover:text-primary transition-colors">
             {activity.name}
           </h3>
-          <span
-            className={`text-xs font-bold uppercase px-3 py-1 rounded-full ${
-              isFull
-                ? "bg-destructive/20 text-destructive"
-                : "bg-primary/20 text-primary"
-            }`}
-          >
-            {isFull ? "Full" : `${activity.seatsLeft}/${activity.capacity}`}
-          </span>
+          {!activity.coverImageUrl ? (
+            <span
+              className={`text-xs font-bold uppercase px-3 py-1 rounded-full ${
+                isFull
+                  ? "bg-destructive/20 text-destructive"
+                  : "bg-primary/20 text-primary"
+              }`}
+            >
+              {isFull ? "Full" : `${activity.seatsLeft}/${activity.capacity}`}
+            </span>
+          ) : null}
         </div>
         {activity.description ? (
           <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
@@ -58,6 +82,6 @@ export const ActivityCard = ({
           ) : null}
         </div>
       </div>
-    </div>
+    </Link>
   );
 };

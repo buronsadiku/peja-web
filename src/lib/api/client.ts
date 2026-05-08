@@ -1,4 +1,5 @@
 import type {
+  ActivityDetail,
   ActivityListItem,
   ApiError,
   CreateRegistrationBody,
@@ -6,7 +7,10 @@ import type {
   FestivalDay,
   GalleryListResponse,
   GallerySection,
+  NewsListResponse,
+  NewsPost,
   RegistrationLookup,
+  Sponsor,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
@@ -60,6 +64,25 @@ export const api = {
       request<{ data: FestivalDay[] }>("/v1/activities/festival-days").then(
         (r) => r.data,
       ),
+    bySlug: (slug: string) =>
+      request<{ data: ActivityDetail }>(`/v1/activities/${slug}`).then(
+        (r) => r.data,
+      ),
+  },
+  news: {
+    list: (params: { page?: number; limit?: number } = {}) => {
+      const search = new URLSearchParams();
+      if (params.page) search.set("page", String(params.page));
+      if (params.limit) search.set("limit", String(params.limit));
+      const qs = search.toString();
+      return request<NewsListResponse>(`/v1/news${qs ? `?${qs}` : ""}`);
+    },
+    bySlug: (slug: string) =>
+      request<{ data: NewsPost }>(`/v1/news/${slug}`).then((r) => r.data),
+  },
+  sponsors: {
+    list: () =>
+      request<{ data: Sponsor[] }>("/v1/sponsors").then((r) => r.data),
   },
   gallery: {
     list: (params: {

@@ -193,6 +193,9 @@ export type OccurrenceInput = {
   capacity: number;
   location?: string | null;
   meetingPoint?: string | null;
+  address?: string | null;
+  latitude?: string | null;
+  longitude?: string | null;
 };
 
 export type FestivalDayRow = {

@@ -181,6 +181,9 @@ export const AdminActivitiesPage = () => {
                               capacity: o.capacity,
                               location: o.location,
                               meetingPoint: o.meetingPoint,
+                              address: o.address,
+                              latitude: o.latitude,
+                              longitude: o.longitude,
                             }}
                             onClose={() => setEditingOccurrence(null)}
                             onSaved={invalidate}
@@ -379,6 +382,9 @@ const OccurrenceForm = ({
     capacity: number;
     location: string | null;
     meetingPoint: string | null;
+    address?: string | null;
+    latitude?: string | null;
+    longitude?: string | null;
   };
   onClose: () => void;
   onSaved: () => void;
@@ -399,6 +405,9 @@ const OccurrenceForm = ({
   const [meetingPoint, setMeetingPoint] = useState(
     occurrence?.meetingPoint ?? "",
   );
+  const [address, setAddress] = useState(occurrence?.address ?? "");
+  const [latitude, setLatitude] = useState(occurrence?.latitude ?? "");
+  const [longitude, setLongitude] = useState(occurrence?.longitude ?? "");
 
   const daysQuery = useQuery({
     queryKey: ["admin", "festival-days"],
@@ -424,6 +433,9 @@ const OccurrenceForm = ({
       capacity: number;
       location: string | null;
       meetingPoint: string | null;
+      address: string | null;
+      latitude: string | null;
+      longitude: string | null;
     }) => adminApi.occurrences.update(id, rest),
     onSuccess: () => {
       onSaved();
@@ -440,6 +452,9 @@ const OccurrenceForm = ({
       capacity: parseInt(capacity, 10),
       location: location || null,
       meetingPoint: meetingPoint || null,
+      address: address || null,
+      latitude: latitude || null,
+      longitude: longitude || null,
     };
     if (occurrence) {
       update.mutate({ id: occurrence.id, ...payload });
@@ -508,6 +523,26 @@ const OccurrenceForm = ({
           value={meetingPoint}
           onChange={(e) => setMeetingPoint(e.target.value)}
           placeholder="Meeting point"
+          className="px-3 py-2 bg-card border border-border rounded-lg text-sm"
+        />
+      </div>
+      <input
+        value={address}
+        onChange={(e) => setAddress(e.target.value)}
+        placeholder="Full address (optional, for map fallback)"
+        className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm"
+      />
+      <div className="grid md:grid-cols-2 gap-2">
+        <input
+          value={latitude}
+          onChange={(e) => setLatitude(e.target.value)}
+          placeholder="Latitude (e.g. 42.6629)"
+          className="px-3 py-2 bg-card border border-border rounded-lg text-sm"
+        />
+        <input
+          value={longitude}
+          onChange={(e) => setLongitude(e.target.value)}
+          placeholder="Longitude (e.g. 20.2876)"
           className="px-3 py-2 bg-card border border-border rounded-lg text-sm"
         />
       </div>

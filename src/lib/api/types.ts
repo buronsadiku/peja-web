@@ -5,6 +5,7 @@ export type ActivityListItem = {
   name: string;
   description: string | null;
   category: ActivityCategory;
+  coverImageUrl: string | null;
   festivalDayId: string;
   date: string;
   dayLabel: string | null;
@@ -12,9 +13,67 @@ export type ActivityListItem = {
   endTime: string;
   location: string | null;
   meetingPoint: string | null;
+  address: string | null;
+  latitude: string | null;
+  longitude: string | null;
   capacity: number;
   seatsTaken: number;
   seatsLeft: number;
+};
+
+export type ActivityImageItem = {
+  id: string;
+  url: string;
+  alt: string;
+  sortOrder: number;
+  isCover: boolean;
+};
+
+export type ActivityDetail = {
+  templateId: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  category: ActivityCategory;
+  coverImageUrl: string | null;
+  images: ActivityImageItem[];
+  occurrences: ActivityListItem[];
+};
+
+export type NewsPost = {
+  id: string;
+  slug: string;
+  title: string;
+  body: string;
+  imageUrl: string | null;
+  pinned: boolean;
+  publishedAt: string;
+  expiresAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type NewsListResponse = {
+  data: NewsPost[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+export type SponsorTier = "gold" | "silver" | "bronze";
+
+export type Sponsor = {
+  id: string;
+  name: string;
+  logoUrl: string;
+  url: string | null;
+  tier: SponsorTier;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type FestivalDay = {

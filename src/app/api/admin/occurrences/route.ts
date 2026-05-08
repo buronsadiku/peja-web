@@ -12,6 +12,9 @@ const createSchema = z.object({
   capacity: z.number().int().min(0),
   location: z.string().nullable().optional(),
   meetingPoint: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  latitude: z.string().nullable().optional(),
+  longitude: z.string().nullable().optional(),
 });
 
 export const POST = async (request: Request) => {

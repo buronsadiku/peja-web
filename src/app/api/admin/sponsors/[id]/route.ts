@@ -2,19 +2,15 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { activityOccurrences } from "@/lib/db/schema";
+import { sponsors } from "@/lib/db/schema";
 import { requireAdminApi } from "@/lib/auth/api-guard";
 
 const patchSchema = z.object({
-  festivalDayId: z.string().uuid().optional(),
-  startTime: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/).optional(),
-  endTime: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/).optional(),
-  capacity: z.number().int().min(0).optional(),
-  location: z.string().nullable().optional(),
-  meetingPoint: z.string().nullable().optional(),
-  address: z.string().nullable().optional(),
-  latitude: z.string().nullable().optional(),
-  longitude: z.string().nullable().optional(),
+  name: z.string().min(1).optional(),
+  logoUrl: z.string().url().optional(),
+  url: z.string().url().nullable().optional(),
+  tier: z.enum(["gold", "silver", "bronze"]).optional(),
+  sortOrder: z.number().int().optional(),
 });
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -34,15 +30,14 @@ export const PATCH = async (request: Request, { params }: Ctx) => {
   }
 
   const [updated] = await db
-    .update(activityOccurrences)
+    .update(sponsors)
     .set({ ...parsed.data, updatedAt: new Date() })
-    .where(eq(activityOccurrences.id, id))
+    .where(eq(sponsors.id, id))
     .returning();
 
   if (!updated) {
     return NextResponse.json({ message: "not found" }, { status: 404 });
   }
-
   return NextResponse.json({ data: updated });
 };
 
@@ -52,13 +47,12 @@ export const DELETE = async (request: Request, { params }: Ctx) => {
 
   const { id } = await params;
   const [deleted] = await db
-    .delete(activityOccurrences)
-    .where(eq(activityOccurrences.id, id))
-    .returning({ id: activityOccurrences.id });
+    .delete(sponsors)
+    .where(eq(sponsors.id, id))
+    .returning({ id: sponsors.id });
 
   if (!deleted) {
     return NextResponse.json({ message: "not found" }, { status: 404 });
   }
-
   return new NextResponse(null, { status: 204 });
 };

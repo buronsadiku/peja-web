@@ -3,10 +3,13 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
+import { LocaleSwitcher } from "./LocaleSwitcher";
+import { ThemeToggle } from "./ThemeToggle";
 
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/activities", label: "Activities" },
+  { href: "/news", label: "News" },
   { href: "/gallery", label: "Gallery" },
 ] as const;
 
@@ -86,6 +89,8 @@ export const SiteNav = () => {
               <span className="relative z-10">Register</span>
               <span className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </Link>
+            <ThemeToggle />
+            <LocaleSwitcher />
           </div>
 
           <button

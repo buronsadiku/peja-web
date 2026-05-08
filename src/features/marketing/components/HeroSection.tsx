@@ -1,5 +1,6 @@
 import { ArrowRight, Calendar } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { Countdown } from "./Countdown";
 
 export const HeroSection = () => {
   return (
@@ -32,9 +33,13 @@ export const HeroSection = () => {
           <span className="text-white">FESTIVAL</span>
         </h1>
 
-        <p className="text-xl md:text-2xl mb-12 text-gray-300 max-w-2xl mx-auto">
+        <p className="text-xl md:text-2xl mb-6 text-gray-300 max-w-2xl mx-auto">
           Four days of incredible activities and music in the heart of Kosovo
         </p>
+
+        <Countdown />
+
+        <div className="mb-12" />
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
