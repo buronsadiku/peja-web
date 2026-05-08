@@ -1,14 +1,41 @@
+"use client";
+
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { api } from "@/lib/api/client";
+import type { GallerySection as Section } from "@/lib/api/types";
 import { GallerySection } from "./components/GallerySection";
-import {
-  adventures,
-  foodAndWine,
-  livePerformances,
-  workshops,
-} from "./data/gallery";
+
+const sectionTitles: Record<Section, string> = {
+  live: "Live Performances",
+  workshops: "Workshops & Activities",
+  adventures: "Mountain Adventures",
+  food: "Food & Wine Tasting",
+};
+
+const sectionOrder: Section[] = ["live", "workshops", "adventures", "food"];
 
 export const GalleryPage = () => {
+  const galleryQuery = useQuery({
+    queryKey: ["gallery"],
+    queryFn: () => api.gallery.list(),
+  });
+
+  const grouped = useMemo(() => {
+    const map: Record<Section, typeof galleryQuery.data> = {
+      live: [],
+      workshops: [],
+      adventures: [],
+      food: [],
+    };
+    for (const item of galleryQuery.data ?? []) {
+      map[item.section]?.push(item);
+    }
+    return map;
+  }, [galleryQuery.data]);
+
   return (
     <div className="pt-24 min-h-screen bg-background">
       <section className="py-20 px-4 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
@@ -25,13 +52,23 @@ export const GalleryPage = () => {
 
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <GallerySection
-            title="Live Performances"
-            entries={livePerformances}
-          />
-          <GallerySection title="Workshops & Activities" entries={workshops} />
-          <GallerySection title="Mountain Adventures" entries={adventures} />
-          <GallerySection title="Food & Wine Tasting" entries={foodAndWine} />
+          {galleryQuery.isLoading ? (
+            <p className="text-center text-muted-foreground">
+              Loading gallery…
+            </p>
+          ) : galleryQuery.isError ? (
+            <p className="text-center text-destructive">
+              Failed to load gallery.
+            </p>
+          ) : (
+            sectionOrder.map((section) => (
+              <GallerySection
+                key={section}
+                title={sectionTitles[section]}
+                entries={grouped[section] ?? []}
+              />
+            ))
+          )}
         </div>
       </section>
 

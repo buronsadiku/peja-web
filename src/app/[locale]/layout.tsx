@@ -3,6 +3,7 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { Providers } from "@/features/layout/Providers";
 import { SiteNav } from "@/features/layout/SiteNav";
 import { SiteFooter } from "@/features/layout/SiteFooter";
 
@@ -46,9 +47,11 @@ export default async function LocaleLayout({
     >
       <body className="font-sans bg-background text-foreground min-h-screen">
         <NextIntlClientProvider messages={messages}>
-          <SiteNav />
-          <main>{children}</main>
-          <SiteFooter />
+          <Providers>
+            <SiteNav />
+            <main>{children}</main>
+            <SiteFooter />
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -1,27 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { activities, type Day } from "@/features/marketing/data/activities";
-import { DayFilterBar, type DayFilter } from "./components/DayFilterBar";
+import { api } from "@/lib/api/client";
+import { DayFilterBar } from "./components/DayFilterBar";
 import { DaySection } from "./components/DaySection";
 
-const orderedDays: Day[] = ["thursday", "friday", "saturday", "sunday"];
-
-const countByDay = (day: Day) =>
-  activities.filter((a) => a.day === day).length;
+const dayShort = (date: string) => {
+  const d = new Date(date + "T00:00:00");
+  return d.toLocaleDateString("en-US", { weekday: "long" });
+};
 
 export const ActivitiesPage = () => {
-  const [filter, setFilter] = useState<DayFilter>("all");
+  const [filter, setFilter] = useState("all");
+  const activitiesQuery = useQuery({
+    queryKey: ["activities"],
+    queryFn: () => api.activities.list(),
+  });
 
-  const filterButtons = [
-    { value: "all" as const, label: "All Days", count: activities.length },
-    { value: "thursday" as const, label: "Thursday", count: countByDay("thursday") },
-    { value: "friday" as const, label: "Friday", count: countByDay("friday") },
-    { value: "saturday" as const, label: "Saturday", count: countByDay("saturday") },
-    { value: "sunday" as const, label: "Sunday", count: countByDay("sunday") },
-  ];
+  const activities = activitiesQuery.data ?? [];
+  const dates = useMemo(
+    () => Array.from(new Set(activities.map((a) => a.date))).sort(),
+    [activities],
+  );
+
+  const filterButtons = useMemo(() => {
+    const buttons = [
+      { value: "all", label: "All Days", count: activities.length },
+    ];
+    for (const date of dates) {
+      buttons.push({
+        value: date,
+        label: dayShort(date),
+        count: activities.filter((a) => a.date === date).length,
+      });
+    }
+    return buttons;
+  }, [activities, dates]);
 
   return (
     <div className="pt-24 min-h-screen">
@@ -32,27 +49,44 @@ export const ActivitiesPage = () => {
           </h1>
           <div className="w-24 h-2 bg-primary mx-auto mb-8" />
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Join us for four days of incredible experiences from Thursday to
-            Sunday
+            Join us for incredible experiences across all four days
           </p>
         </div>
       </section>
 
       <section className="py-16 px-4 bg-background">
         <div className="max-w-7xl mx-auto">
-          <DayFilterBar
-            filter={filter}
-            onChange={setFilter}
-            buttons={filterButtons}
-          />
+          {activitiesQuery.isLoading ? (
+            <p className="text-center text-muted-foreground">
+              Loading activities…
+            </p>
+          ) : activitiesQuery.isError ? (
+            <p className="text-center text-destructive">
+              Failed to load activities. Try again later.
+            </p>
+          ) : (
+            <>
+              <DayFilterBar
+                filter={filter}
+                onChange={setFilter}
+                buttons={filterButtons}
+              />
 
-          {orderedDays.map((day) => {
-            if (filter !== "all" && filter !== day) return null;
-            const dayActivities = activities.filter((a) => a.day === day);
-            return (
-              <DaySection key={day} day={day} activities={dayActivities} />
-            );
-          })}
+              {dates.map((date) => {
+                if (filter !== "all" && filter !== date) return null;
+                const dayActivities = activities.filter(
+                  (a) => a.date === date,
+                );
+                return (
+                  <DaySection
+                    key={date}
+                    date={date}
+                    activities={dayActivities}
+                  />
+                );
+              })}
+            </>
+          )}
         </div>
       </section>
 

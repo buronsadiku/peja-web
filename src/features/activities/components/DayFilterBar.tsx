@@ -1,16 +1,12 @@
-import type { Day } from "@/features/marketing/data/activities";
-
-type DayFilter = "all" | Day;
-
 type FilterButtonConfig = {
-  value: DayFilter;
+  value: string;
   label: string;
   count: number;
 };
 
 type DayFilterBarProps = {
-  filter: DayFilter;
-  onChange: (next: DayFilter) => void;
+  filter: string;
+  onChange: (next: string) => void;
   buttons: FilterButtonConfig[];
 };
 
@@ -61,5 +57,3 @@ export const DayFilterBar = ({
     </div>
   );
 };
-
-export type { DayFilter };
