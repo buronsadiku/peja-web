@@ -74,19 +74,29 @@ export const AdminFestivalDaysPage = () => {
 
   const handleDayClick = (date: Date) => {
     const key = dateToString(date);
+    const pretty = date.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
     const existing = dayByDate.get(key);
     if (existing) {
       if (
         confirm(
-          `Remove ${key} from festival? (Will fail if activities or registrations reference it.)`,
+          `Remove ${pretty} from the festival?\n\nThis will fail if any activity occurrence or participant registration still references this day.`,
         )
       ) {
         deleteDay.mutate(existing.id);
       }
     } else {
-      const nextSortOrder =
-        days.length > 0 ? Math.max(...days.map((d) => d.sortOrder)) + 1 : 1;
-      create.mutate({ date: key, sortOrder: nextSortOrder });
+      if (confirm(`Add ${pretty} as a festival day?`)) {
+        const nextSortOrder =
+          days.length > 0
+            ? Math.max(...days.map((d) => d.sortOrder)) + 1
+            : 1;
+        create.mutate({ date: key, sortOrder: nextSortOrder });
+      }
     }
   };
 
