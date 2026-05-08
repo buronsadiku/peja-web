@@ -66,7 +66,12 @@ export const RegisterPage = () => {
     mutationFn: api.registrations.create,
     onSuccess: (data) => {
       setSubmittedSummary({ date: data.date, activities: data.activities });
-      setForm(initialForm);
+      setForm((prev) => ({
+        ...initialForm,
+        email: prev.email,
+        fullName: prev.fullName,
+        phone: prev.phone,
+      }));
       queryClient.invalidateQueries({ queryKey: ["activities"] });
     },
   });
