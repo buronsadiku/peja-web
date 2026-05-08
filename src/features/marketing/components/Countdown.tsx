@@ -20,20 +20,20 @@ export const Countdown = () => {
     queryFn: () => api.activities.festivalDays(),
   });
 
-  const startDate = daysQuery.data?.[0]?.date;
-  const target = startDate ? new Date(startDate + "T00:00:00") : null;
+  const startDate = daysQuery.data?.[0]?.date ?? null;
 
   const [time, setTime] = useState<ReturnType<typeof calc>>(null);
 
   useEffect(() => {
-    if (!target) return;
+    if (!startDate) return;
+    const target = new Date(startDate + "T00:00:00");
     const tick = () => setTime(calc(target));
     tick();
     const i = setInterval(tick, 1000);
     return () => clearInterval(i);
-  }, [target]);
+  }, [startDate]);
 
-  if (!target || !time) return null;
+  if (!startDate || !time) return null;
 
   const cells = [
     { value: time.days, label: "Days" },
