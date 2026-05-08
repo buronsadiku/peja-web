@@ -7,7 +7,7 @@ import { requireAdminApi } from "@/lib/auth/api-guard";
 
 const patchSchema = z.object({
   url: z.string().url().optional(),
-  alt: z.string().min(1).optional(),
+  alt: z.string().optional(),
   title: z.string().nullable().optional(),
   caption: z.string().nullable().optional(),
   section: z.enum(["live", "workshops", "adventures", "food"]).optional(),

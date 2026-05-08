@@ -287,10 +287,9 @@ const GalleryForm = ({
       </div>
       <div className={`grid ${inline ? "" : "md:grid-cols-2"} gap-2`}>
         <input
-          required
           value={alt}
           onChange={(e) => setAlt(e.target.value)}
-          placeholder="Alt text"
+          placeholder="Alt text (optional)"
           className={`px-3 py-2 bg-background border border-border rounded-lg ${inline ? "text-xs" : ""}`}
         />
         <input

@@ -7,7 +7,7 @@ import { requireAdminApi } from "@/lib/auth/api-guard";
 
 const createSchema = z.object({
   url: z.string().url(),
-  alt: z.string().min(1),
+  alt: z.string().default(""),
   title: z.string().nullable().optional(),
   caption: z.string().nullable().optional(),
   section: z.enum(["live", "workshops", "adventures", "food"]),
