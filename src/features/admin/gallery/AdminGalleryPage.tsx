@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Upload } from "lucide-react";
 import {
   adminApi,
   type GalleryRow,
@@ -169,6 +169,26 @@ const GalleryForm = ({
   const [caption, setCaption] = useState(item?.caption ?? "");
   const [section, setSection] = useState<GallerySection>(item?.section ?? "live");
   const [sortOrder, setSortOrder] = useState(String(item?.sortOrder ?? 0));
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const upload = useMutation({
+    mutationFn: adminApi.uploadImage,
+    onSuccess: (publicUrl) => {
+      setUrl(publicUrl);
+      setUploadError(null);
+    },
+    onError: (err: Error) => {
+      setUploadError(err.message);
+    },
+  });
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!alt) setAlt(file.name.replace(/\.[^.]+$/, ""));
+    upload.mutate(file);
+  };
 
   const create = useMutation({
     mutationFn: adminApi.gallery.create,
@@ -206,13 +226,45 @@ const GalleryForm = ({
           : "bg-card border-2 border-primary rounded-xl p-5 mb-6 space-y-3"
       }`}
     >
-      <input
-        required
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="Image URL"
-        className={`w-full px-3 py-2 bg-background border border-border rounded-lg ${inline ? "text-xs" : ""}`}
-      />
+      <div className="space-y-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFile}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={upload.isPending}
+          className={`w-full bg-primary/10 border-2 border-dashed border-primary text-primary rounded-lg flex items-center justify-center gap-2 hover:bg-primary/20 transition-all ${inline ? "px-3 py-2 text-xs" : "px-4 py-3"} disabled:opacity-50`}
+        >
+          <Upload className={inline ? "w-3 h-3" : "w-4 h-4"} />
+          {upload.isPending
+            ? "Uploading…"
+            : url
+              ? "Replace image"
+              : "Upload image"}
+        </button>
+        {uploadError ? (
+          <p className="text-xs text-destructive">{uploadError}</p>
+        ) : null}
+        {url ? (
+          <img
+            src={url}
+            alt="preview"
+            className="w-full max-h-40 object-cover rounded-lg border border-border"
+          />
+        ) : null}
+        <input
+          required
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="…or paste an image URL"
+          className={`w-full px-3 py-2 bg-background border border-border rounded-lg ${inline ? "text-xs" : ""}`}
+        />
+      </div>
       <div className={`grid ${inline ? "" : "md:grid-cols-2"} gap-2`}>
         <input
           required

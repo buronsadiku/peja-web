@@ -62,6 +62,20 @@ export const adminApi = {
     delete: (id: string) =>
       request<void>(`/api/admin/gallery/${id}`, { method: "DELETE" }),
   },
+  uploadImage: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/admin/gallery/upload", {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(text || `upload failed (${res.status})`);
+    }
+    const json = (await res.json()) as { data: { publicUrl: string } };
+    return json.data.publicUrl;
+  },
   registrations: {
     list: () =>
       request<{ data: RegistrationRow[] }>("/api/admin/registrations").then(
