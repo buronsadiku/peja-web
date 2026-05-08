@@ -17,7 +17,7 @@ export const HeroSection = () => {
         <div className="absolute inset-0 bg-background/60" />
       </div>
 
-      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
+      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto pt-24">
         <div className="mb-8">
           <div className="inline-flex items-center gap-3 bg-primary/20 backdrop-blur-sm border border-primary px-6 py-3 rounded-full">
             <Calendar className="w-5 h-5 text-primary" />
