@@ -30,6 +30,7 @@ export const GET = async (request: Request) => {
   );
   const q = (url.searchParams.get("q") ?? "").trim();
   const occurrenceId = url.searchParams.get("occurrenceId");
+  const date = url.searchParams.get("date");
   const offset = (page - 1) * limit;
 
   const filters: SQL[] = [];
@@ -56,6 +57,9 @@ export const GET = async (request: Request) => {
           ),
       ),
     );
+  }
+  if (date) {
+    filters.push(eq(registrations.date, date));
   }
 
   const where = filters.length ? and(...filters) : undefined;

@@ -32,6 +32,7 @@ export const AdminRegistrationsPage = () => {
   const [occurrenceFilter, setOccurrenceFilter] = useState<string | "all">(
     "all",
   );
+  const [dayFilter, setDayFilter] = useState<string | "all">("all");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -50,6 +51,17 @@ export const AdminRegistrationsPage = () => {
     queryFn: () => api.activities.list(),
   });
 
+  const datesQuery = useQuery({
+    queryKey: ["festival-dates"],
+    queryFn: () => api.activities.dates(),
+  });
+
+  const allOccurrences = occurrencesQuery.data ?? [];
+  const visibleOccurrences =
+    dayFilter === "all"
+      ? allOccurrences
+      : allOccurrences.filter((o) => o.date === dayFilter);
+
   const registrationsQuery = useQuery({
     queryKey: [
       "admin",
@@ -57,6 +69,7 @@ export const AdminRegistrationsPage = () => {
       page,
       debouncedSearch,
       occurrenceFilter,
+      dayFilter,
     ],
     queryFn: () =>
       adminApi.registrations.list({
@@ -65,10 +78,17 @@ export const AdminRegistrationsPage = () => {
         q: debouncedSearch || undefined,
         occurrenceId:
           occurrenceFilter === "all" ? undefined : occurrenceFilter,
+        date: dayFilter === "all" ? undefined : dayFilter,
       }),
   });
 
-  const handleFilter = (next: string | "all") => {
+  const handleDayFilter = (next: string | "all") => {
+    setDayFilter(next);
+    setOccurrenceFilter("all");
+    setPage(1);
+  };
+
+  const handleActivityFilter = (next: string | "all") => {
     setOccurrenceFilter(next);
     setPage(1);
   };
@@ -115,36 +135,85 @@ export const AdminRegistrationsPage = () => {
         ) : null}
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        <button
-          onClick={() => handleFilter("all")}
-          className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-            occurrenceFilter === "all"
-              ? "bg-primary text-primary-foreground"
-              : "bg-card border border-border text-foreground hover:border-primary"
-          }`}
-        >
-          All
-        </button>
-        {(occurrencesQuery.data ?? []).map((o) => {
-          const active = occurrenceFilter === o.occurrenceId;
-          return (
+      <div className="space-y-3 mb-6">
+        <div>
+          <p className="text-xs uppercase text-muted-foreground mb-2">Day</p>
+          <div className="flex flex-wrap gap-2">
             <button
-              key={o.occurrenceId}
-              onClick={() => handleFilter(o.occurrenceId)}
+              onClick={() => handleDayFilter("all")}
               className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                active
+                dayFilter === "all"
                   ? "bg-primary text-primary-foreground"
                   : "bg-card border border-border text-foreground hover:border-primary"
               }`}
             >
-              {o.name}
-              <span className="ml-1.5 opacity-70 font-normal">
-                {formatDate(o.date)} · {formatTime(o.startTime)}
-              </span>
+              All days
             </button>
-          );
-        })}
+            {(datesQuery.data ?? []).map((d) => {
+              const active = dayFilter === d;
+              return (
+                <button
+                  key={d}
+                  onClick={() => handleDayFilter(d)}
+                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card border border-border text-foreground hover:border-primary"
+                  }`}
+                >
+                  {new Date(d + "T00:00:00").toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs uppercase text-muted-foreground mb-2">
+            Activity{" "}
+            {dayFilter !== "all" ? (
+              <span className="text-muted-foreground/70 normal-case">
+                (within selected day)
+              </span>
+            ) : null}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleActivityFilter("all")}
+              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                occurrenceFilter === "all"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-card border border-border text-foreground hover:border-primary"
+              }`}
+            >
+              All activities
+            </button>
+            {visibleOccurrences.map((o) => {
+              const active = occurrenceFilter === o.occurrenceId;
+              return (
+                <button
+                  key={o.occurrenceId}
+                  onClick={() => handleActivityFilter(o.occurrenceId)}
+                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card border border-border text-foreground hover:border-primary"
+                  }`}
+                >
+                  {o.name}
+                  <span className="ml-1.5 opacity-70 font-normal">
+                    {dayFilter === "all" ? `${formatDate(o.date)} · ` : ""}
+                    {formatTime(o.startTime)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {registrationsQuery.isLoading ? (

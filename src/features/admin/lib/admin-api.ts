@@ -94,6 +94,7 @@ export const adminApi = {
       limit?: number;
       q?: string;
       occurrenceId?: string;
+      date?: string;
     }) => {
       const search = new URLSearchParams();
       if (params?.page) search.set("page", String(params.page));
@@ -101,6 +102,7 @@ export const adminApi = {
       if (params?.q) search.set("q", params.q);
       if (params?.occurrenceId)
         search.set("occurrenceId", params.occurrenceId);
+      if (params?.date) search.set("date", params.date);
       const qs = search.toString();
       return request<PaginatedResponse<RegistrationRow>>(
         `/api/admin/registrations${qs ? `?${qs}` : ""}`,
