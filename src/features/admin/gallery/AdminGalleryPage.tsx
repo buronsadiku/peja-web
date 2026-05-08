@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  useInfiniteQuery,
   useMutation,
-  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { Images, Plus, Trash2, Upload } from "lucide-react";
@@ -12,25 +12,53 @@ import {
   type GalleryRow,
   type GallerySection,
 } from "../lib/admin-api";
-import { Pagination } from "../components/Pagination";
 
 const PAGE_LIMIT = 20;
 
 const sections: GallerySection[] = ["live", "workshops", "adventures", "food"];
 
+type SectionFilter = "all" | GallerySection;
+
+const sectionFilters: { value: SectionFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "live", label: "Live" },
+  { value: "workshops", label: "Workshops" },
+  { value: "adventures", label: "Adventures" },
+  { value: "food", label: "Food & Wine" },
+];
+
 export const AdminGalleryPage = () => {
   const queryClient = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [showBulk, setShowBulk] = useState(false);
-  const [page, setPage] = useState(1);
+  const [filter, setFilter] = useState<SectionFilter>("all");
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const galleryQuery = useQuery({
-    queryKey: ["admin", "gallery", page],
-    queryFn: () => adminApi.gallery.list({ page, limit: PAGE_LIMIT }),
+  const galleryQuery = useInfiniteQuery({
+    queryKey: ["admin", "gallery", filter],
+    queryFn: ({ pageParam }) =>
+      adminApi.gallery.list({
+        page: pageParam,
+        limit: PAGE_LIMIT,
+        section: filter === "all" ? undefined : filter,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
   });
 
-  const items = galleryQuery.data?.data ?? [];
-  const pagination = galleryQuery.data?.pagination;
+  const items = useMemo<GalleryRow[]>(
+    () => galleryQuery.data?.pages.flatMap((p) => p.data) ?? [],
+    [galleryQuery.data],
+  );
+
+  const total = galleryQuery.data?.pages[0]?.pagination.total ?? 0;
+
+  const handleFilterChange = (next: SectionFilter) => {
+    setFilter(next);
+  };
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["admin", "gallery"] });
@@ -41,6 +69,25 @@ export const AdminGalleryPage = () => {
     mutationFn: adminApi.gallery.delete,
     onSuccess: invalidate,
   });
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0]?.isIntersecting &&
+          galleryQuery.hasNextPage &&
+          !galleryQuery.isFetchingNextPage
+        ) {
+          galleryQuery.fetchNextPage();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [galleryQuery]);
 
   return (
     <div>
@@ -78,47 +125,57 @@ export const AdminGalleryPage = () => {
         />
       ) : null}
 
+      <div className="flex flex-wrap gap-2 mb-6">
+        {sectionFilters.map((f) => {
+          const active = filter === f.value;
+          return (
+            <button
+              key={f.value}
+              onClick={() => handleFilterChange(f.value)}
+              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                active
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-card border border-border text-foreground hover:border-primary"
+              }`}
+            >
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
+
       {galleryQuery.isLoading ? (
         <p className="text-muted-foreground">Loading…</p>
+      ) : items.length === 0 ? (
+        <p className="text-muted-foreground">
+          No images in this section yet.
+        </p>
       ) : (
         <>
-          <div className="space-y-10">
-            {sections.map((section) => {
-              const sectionItems = items.filter((i) => i.section === section);
-              if (sectionItems.length === 0) return null;
-              return (
-                <div key={section}>
-                  <h2 className="text-xl font-bold capitalize mb-4">
-                    {section}{" "}
-                    <span className="text-sm text-muted-foreground font-normal">
-                      ({sectionItems.length})
-                    </span>
-                  </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {sectionItems.map((item) => (
-                      <GalleryCard
-                        key={item.id}
-                        item={item}
-                        onDelete={() => {
-                          if (confirm("Delete this image?"))
-                            deleteImage.mutate(item.id);
-                        }}
-                        onUpdated={invalidate}
-                      />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {items.map((item) => (
+              <GalleryCard
+                key={item.id}
+                item={item}
+                onDelete={() => {
+                  if (confirm("Delete this image?"))
+                    deleteImage.mutate(item.id);
+                }}
+                onUpdated={invalidate}
+              />
+            ))}
           </div>
-          {pagination ? (
-            <Pagination
-              page={pagination.page}
-              totalPages={pagination.totalPages}
-              total={pagination.total}
-              limit={pagination.limit}
-              onChange={setPage}
-            />
+
+          <div ref={sentinelRef} className="h-10" />
+
+          {galleryQuery.isFetchingNextPage ? (
+            <p className="text-center text-muted-foreground py-6 text-sm">
+              Loading more…
+            </p>
+          ) : !galleryQuery.hasNextPage ? (
+            <p className="text-center text-muted-foreground py-6 text-sm">
+              Showing all {total} photos
+            </p>
           ) : null}
         </>
       )}

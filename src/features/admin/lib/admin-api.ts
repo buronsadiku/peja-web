@@ -47,10 +47,15 @@ export const adminApi = {
       request<void>(`/api/admin/occurrences/${id}`, { method: "DELETE" }),
   },
   gallery: {
-    list: (params?: { page?: number; limit?: number }) => {
+    list: (params?: {
+      page?: number;
+      limit?: number;
+      section?: GallerySection;
+    }) => {
       const search = new URLSearchParams();
       if (params?.page) search.set("page", String(params.page));
       if (params?.limit) search.set("limit", String(params.limit));
+      if (params?.section) search.set("section", params.section);
       const qs = search.toString();
       return request<PaginatedResponse<GalleryRow>>(
         `/api/admin/gallery${qs ? `?${qs}` : ""}`,

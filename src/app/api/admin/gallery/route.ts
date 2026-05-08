@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { asc, sql } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { galleryImages } from "@/lib/db/schema";
 import { requireAdminApi } from "@/lib/auth/api-guard";
+
+const sectionEnum = z.enum(["live", "workshops", "adventures", "food"]);
 
 const createSchema = z.object({
   url: z.string().url(),
@@ -24,15 +26,23 @@ export const GET = async (request: Request) => {
     100,
     Math.max(1, parseInt(url.searchParams.get("limit") ?? "30", 10)),
   );
+  const sectionParam = url.searchParams.get("section");
+  const sectionResult = sectionParam ? sectionEnum.safeParse(sectionParam) : null;
+  const sectionFilter = sectionResult?.success ? sectionResult.data : null;
+  const where = sectionFilter
+    ? eq(galleryImages.section, sectionFilter)
+    : undefined;
   const offset = (page - 1) * limit;
 
   const [{ count }] = await db
     .select({ count: sql<number>`COUNT(*)::int` })
-    .from(galleryImages);
+    .from(galleryImages)
+    .where(where);
 
   const rows = await db
     .select()
     .from(galleryImages)
+    .where(where)
     .orderBy(asc(galleryImages.section), asc(galleryImages.sortOrder))
     .limit(limit)
     .offset(offset);
