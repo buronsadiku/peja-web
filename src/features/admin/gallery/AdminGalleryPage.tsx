@@ -70,24 +70,22 @@ export const AdminGalleryPage = () => {
     onSuccess: invalidate,
   });
 
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = galleryQuery;
+
   useEffect(() => {
     const node = sentinelRef.current;
     if (!node) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (
-          entries[0]?.isIntersecting &&
-          galleryQuery.hasNextPage &&
-          !galleryQuery.isFetchingNextPage
-        ) {
-          galleryQuery.fetchNextPage();
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
         }
       },
       { rootMargin: "200px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [galleryQuery]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div>
