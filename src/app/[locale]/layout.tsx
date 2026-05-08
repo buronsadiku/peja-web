@@ -3,7 +3,6 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { AppProviders } from "@/features/layout/AppProviders";
 
 const rubik = Rubik({
   subsets: ["latin"],
@@ -22,17 +21,6 @@ export const generateStaticParams = () => {
   return routing.locales.map((locale) => ({ locale }));
 };
 
-const themeScript = `(function(){
-  try {
-    var d = document.documentElement;
-    var t = JSON.parse(localStorage.getItem('theme') || '{}');
-    var v = t && t.state && t.state.theme;
-    if (v === 'dark') {
-      d.classList.add('dark');
-    }
-  } catch(e) {}
-})()`;
-
 export default async function LocaleLayout({
   children,
   params,
@@ -49,14 +37,14 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${rubik.variable} ${notoSans.variable} h-dvh antialiased`} suppressHydrationWarning>
+    <html
+      lang={locale}
+      className={`${rubik.variable} ${notoSans.variable} h-dvh antialiased`}
+      suppressHydrationWarning
+    >
       <body className="font-sans flex max-h-dvh flex-1 flex-col">
-        <script
-          id="theme-init"
-          dangerouslySetInnerHTML={{ __html: themeScript }}
-        />
         <NextIntlClientProvider messages={messages}>
-          <AppProviders>{children}</AppProviders>
+          {children}
         </NextIntlClientProvider>
       </body>
     </html>

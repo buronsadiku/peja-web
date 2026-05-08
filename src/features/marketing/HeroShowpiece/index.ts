@@ -1,1 +1,0 @@
-export { HeroShowpiece } from "./HeroShowpiece";

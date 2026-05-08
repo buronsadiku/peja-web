@@ -1,1 +1,0 @@
-export { GoldBookPage } from "./GoldBookPage";

@@ -1,1 +1,0 @@
-export { LogoBar } from "./LogoBar";
