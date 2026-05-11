@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2, Upload } from "lucide-react";
 import {
   sponsorsAdminApi,
   type SponsorRow,
 } from "../lib/news-api";
+import { adminApi } from "../lib/admin-api";
 
 const tiers: SponsorRow["tier"][] = ["gold", "silver", "bronze"];
 
@@ -142,6 +143,23 @@ const SponsorForm = ({
   const [name, setName] = useState(sponsor?.name ?? "");
   const [logoUrl, setLogoUrl] = useState(sponsor?.logoUrl ?? "");
   const [url, setUrl] = useState(sponsor?.url ?? "");
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const upload = useMutation({
+    mutationFn: adminApi.uploadImage,
+    onSuccess: (publicUrl) => {
+      setLogoUrl(publicUrl);
+      setUploadError(null);
+    },
+    onError: (err: Error) => setUploadError(err.message),
+  });
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    upload.mutate(file);
+  };
   const [tier, setTier] = useState<SponsorRow["tier"]>(
     sponsor?.tier ?? "bronze",
   );
@@ -192,22 +210,45 @@ const SponsorForm = ({
       onSubmit={handleSubmit}
       className="bg-card border-2 border-primary rounded-xl p-5 mb-4 space-y-3"
     >
-      <div className="grid md:grid-cols-2 gap-3">
+      <input
+        required
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Name"
+        className="w-full px-4 py-2 bg-background border border-border rounded-lg"
+      />
+
+      <div className="space-y-2">
         <input
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-          className="px-4 py-2 bg-background border border-border rounded-lg"
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFile}
+          className="hidden"
         />
-        <input
-          required
-          type="url"
-          value={logoUrl}
-          onChange={(e) => setLogoUrl(e.target.value)}
-          placeholder="Logo URL"
-          className="px-4 py-2 bg-background border border-border rounded-lg"
-        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={upload.isPending}
+          className="w-full bg-primary/10 border-2 border-dashed border-primary text-primary rounded-lg flex items-center justify-center gap-2 hover:bg-primary/20 transition-all px-4 py-3 disabled:opacity-50"
+        >
+          <Upload className="w-4 h-4" />
+          {upload.isPending
+            ? "Uploading…"
+            : logoUrl
+              ? "Replace logo"
+              : "Upload logo"}
+        </button>
+        {uploadError ? (
+          <p className="text-xs text-destructive">{uploadError}</p>
+        ) : null}
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt="logo preview"
+            className="h-20 max-w-full object-contain bg-white/5 rounded-lg border border-border p-2 mx-auto"
+          />
+        ) : null}
       </div>
       <input
         type="url"
@@ -239,8 +280,8 @@ const SponsorForm = ({
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={create.isPending || update.isPending}
-          className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-bold"
+          disabled={!logoUrl || create.isPending || update.isPending}
+          className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {sponsor ? "Update" : "Create"}
         </button>
