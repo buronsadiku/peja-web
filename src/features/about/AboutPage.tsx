@@ -88,7 +88,7 @@ export const AboutPage = () => {
           <div className="relative order-2 lg:order-1">
             <div className="aspect-[4/5] rounded-3xl overflow-hidden border border-border">
               <img
-                src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1200"
+                src="/Artboard%201.jpg"
                 alt="Mountains around Peja"
                 className="w-full h-full object-cover"
               />
@@ -110,8 +110,11 @@ export const AboutPage = () => {
             <p className="text-lg text-muted-foreground leading-relaxed mb-4">
               {t("intro_p1")}
             </p>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+            <p className="text-lg text-muted-foreground leading-relaxed mb-4">
               {t("intro_p2")}
+            </p>
+            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+              {t("intro_p3")}
             </p>
             <Link
               href="/activities"
