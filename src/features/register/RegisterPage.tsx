@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocale, useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { api, ApiClientError } from "@/lib/api/client";
 import { computeDisabledReasons } from "./lib/conflicts";
@@ -15,7 +16,6 @@ type FormState = {
   festivalDayId: string | null;
   selectedIds: Set<string>;
   responsibilityAccepted: boolean;
-  notifyIfAbsent: boolean;
   commitmentAccepted: boolean;
 };
 
@@ -26,11 +26,12 @@ const initialForm: FormState = {
   festivalDayId: null,
   selectedIds: new Set(),
   responsibilityAccepted: false,
-  notifyIfAbsent: false,
   commitmentAccepted: false,
 };
 
 export const RegisterPage = () => {
+  const locale = useLocale();
+  const t = useTranslations("register");
   const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState>(initialForm);
   const [submittedSummary, setSubmittedSummary] = useState<{
@@ -45,8 +46,9 @@ export const RegisterPage = () => {
   });
 
   const activitiesQuery = useQuery({
-    queryKey: ["activities", form.festivalDayId],
-    queryFn: () => api.activities.list(form.festivalDayId ?? undefined),
+    queryKey: ["activities", form.festivalDayId, locale],
+    queryFn: () =>
+      api.activities.list(form.festivalDayId ?? undefined, locale),
     enabled: !!form.festivalDayId,
   });
 
@@ -130,7 +132,7 @@ export const RegisterPage = () => {
       festivalDayId: form.festivalDayId,
       occurrenceIds: Array.from(form.selectedIds),
       responsibilityAccepted: true,
-      notifyIfAbsent: form.notifyIfAbsent,
+      notifyIfAbsent: false,
     });
   };
 
@@ -143,11 +145,10 @@ export const RegisterPage = () => {
               <Check className="w-12 h-12 text-primary" />
             </div>
             <h1 className="text-4xl md:text-5xl font-black mb-4">
-              <span className="text-primary">REGISTERED!</span>
+              <span className="text-primary">{t("registered_title")}</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              You&apos;re in for {submittedSummary.date}. A confirmation email
-              is on its way.
+              {t("registered_body", { date: submittedSummary.date })}
             </p>
             <ul className="text-left bg-background border border-border rounded-xl p-6 mb-8">
               {submittedSummary.activities.map((a) => (
@@ -160,7 +161,7 @@ export const RegisterPage = () => {
               onClick={() => setSubmittedSummary(null)}
               className="bg-primary text-primary-foreground px-8 py-4 rounded-full font-bold hover:bg-primary/90 transition-all"
             >
-              Register Another Day
+              {t("register_another")}
             </button>
           </div>
         </section>
@@ -173,9 +174,9 @@ export const RegisterPage = () => {
     submitError instanceof ApiClientError
       ? "message" in submitError.payload
         ? submitError.payload.message
-        : "Submission failed."
+        : t("submission_failed")
       : submitError
-        ? "Submission failed. Try again."
+        ? t("submission_failed_retry")
         : null;
 
   return (
@@ -183,13 +184,10 @@ export const RegisterPage = () => {
       <section className="py-20 px-4 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-black mb-6">
-            <span className="text-primary">REGISTER</span> NOW
+            <span className="text-primary">{t("hero_a")}</span> {t("hero_b")}
           </h1>
           <div className="w-24 h-2 bg-primary mx-auto mb-8" />
-          <p className="text-xl text-muted-foreground">
-            One registration per email per day. Choose your day, then your
-            activities.
-          </p>
+          <p className="text-xl text-muted-foreground">{t("subtitle")}</p>
         </div>
       </section>
 
@@ -199,9 +197,11 @@ export const RegisterPage = () => {
             onSubmit={handleSubmit}
             className="bg-card border border-border rounded-3xl p-8 md:p-12 shadow-2xl"
           >
-            <h2 className="text-3xl font-black mb-8">1. Select Day</h2>
+            <h2 className="text-3xl font-black mb-8">{t("step_select_day")}</h2>
             {datesQuery.isLoading ? (
-              <p className="text-muted-foreground mb-8">Loading dates…</p>
+              <p className="text-muted-foreground mb-8">
+                {t("loading_dates")}
+              </p>
             ) : (
               <div className="mb-10">
                 <DayPicker
@@ -212,11 +212,13 @@ export const RegisterPage = () => {
               </div>
             )}
 
-            <h2 className="text-3xl font-black mb-8">2. Personal Information</h2>
+            <h2 className="text-3xl font-black mb-8">
+              {t("step_personal_info")}
+            </h2>
 
             <div className="mb-6">
               <label htmlFor="email" className="block mb-3 text-lg">
-                Email Address <span className="text-primary">*</span>
+                {t("email_label")} <span className="text-primary">*</span>
               </label>
               <input
                 type="email"
@@ -228,18 +230,18 @@ export const RegisterPage = () => {
                 }
                 onBlur={onEmailBlur}
                 className="w-full px-6 py-4 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors text-lg"
-                placeholder="your@email.com"
+                placeholder={t("email_placeholder")}
               />
               {lookupMutation.data ? (
                 <p className="text-xs text-primary mt-2">
-                  Auto-filled from prior registration. Edit if needed.
+                  {t("email_autofilled")}
                 </p>
               ) : null}
             </div>
 
             <div className="mb-6">
               <label htmlFor="name" className="block mb-3 text-lg">
-                Full Name <span className="text-primary">*</span>
+                {t("name_label")} <span className="text-primary">*</span>
               </label>
               <input
                 type="text"
@@ -248,13 +250,13 @@ export const RegisterPage = () => {
                 value={form.fullName}
                 onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                 className="w-full px-6 py-4 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors text-lg"
-                placeholder="Enter your full name"
+                placeholder={t("name_placeholder")}
               />
             </div>
 
             <div className="mb-8">
               <label htmlFor="phone" className="block mb-3 text-lg">
-                Phone Number <span className="text-primary">*</span>
+                {t("phone_label")} <span className="text-primary">*</span>
               </label>
               <input
                 type="tel"
@@ -263,22 +265,22 @@ export const RegisterPage = () => {
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 className="w-full px-6 py-4 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors text-lg"
-                placeholder="+383 XX XXX XXX"
+                placeholder={t("phone_placeholder")}
               />
             </div>
 
             <div className="border-t border-border pt-8 mb-8">
-              <h2 className="text-3xl font-black mb-6">3. Select Activities</h2>
+              <h2 className="text-3xl font-black mb-6">
+                {t("step_select_activities")}
+              </h2>
               {!form.festivalDayId ? (
-                <p className="text-muted-foreground">
-                  Pick a day above to see activities.
-                </p>
+                <p className="text-muted-foreground">{t("pick_day_first")}</p>
               ) : activitiesQuery.isLoading ? (
-                <p className="text-muted-foreground">Loading activities…</p>
-              ) : activities.length === 0 ? (
                 <p className="text-muted-foreground">
-                  No activities for this day yet.
+                  {t("loading_activities")}
                 </p>
+              ) : activities.length === 0 ? (
+                <p className="text-muted-foreground">{t("no_activities")}</p>
               ) : (
                 <div className="space-y-3">
                   {activities.map((activity) => (
@@ -295,7 +297,7 @@ export const RegisterPage = () => {
             </div>
 
             <div className="border-t border-border pt-8 mb-8">
-              <h2 className="text-3xl font-black mb-6">4. Terms & Commitment</h2>
+              <h2 className="text-3xl font-black mb-6">{t("step_terms")}</h2>
 
               <label className="flex items-start gap-4 p-5 bg-background border-2 border-border rounded-xl cursor-pointer hover:border-primary transition-all mb-4 group">
                 <input
@@ -312,13 +314,11 @@ export const RegisterPage = () => {
                 />
                 <div className="flex-1">
                   <p className="font-bold text-lg group-hover:text-primary transition-colors mb-2">
-                    Liability & responsibility{" "}
+                    {t("liability_title")}{" "}
                     <span className="text-primary">*</span>
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    I accept full responsibility for any injuries or accidents
-                    during festival activities. I participate at my own risk
-                    and will not hold organizers liable.
+                    {t("liability_body")}
                   </p>
                 </div>
               </label>
@@ -335,36 +335,15 @@ export const RegisterPage = () => {
                 />
                 <div className="flex-1">
                   <p className="font-bold text-lg group-hover:text-primary transition-colors mb-2">
-                    Commitment to attend{" "}
+                    {t("commitment_title")}{" "}
                     <span className="text-primary">*</span>
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    I commit to showing up for the activities I&apos;ve
-                    registered for. Spots are limited and my no-show prevents
-                    others from joining.
+                    {t("commitment_body")}
                   </p>
                 </div>
               </label>
 
-              <label className="flex items-start gap-4 p-5 bg-background border-2 border-border rounded-xl cursor-pointer hover:border-primary transition-all group">
-                <input
-                  type="checkbox"
-                  checked={form.notifyIfAbsent}
-                  onChange={(e) =>
-                    setForm({ ...form, notifyIfAbsent: e.target.checked })
-                  }
-                  className="w-5 h-5 mt-1 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
-                />
-                <div className="flex-1">
-                  <p className="font-bold text-lg group-hover:text-primary transition-colors mb-2">
-                    Notify me if I don&apos;t attend
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Receive a follow-up email if I miss any of my registered
-                    activities.
-                  </p>
-                </div>
-              </label>
             </div>
 
             {submitErrorMessage ? (
@@ -386,20 +365,18 @@ export const RegisterPage = () => {
               }
               className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground py-5 rounded-xl text-xl font-bold hover:shadow-2xl hover:shadow-primary/50 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none"
             >
-              {submitMutation.isPending
-                ? "Submitting…"
-                : "Complete Registration"}
+              {submitMutation.isPending ? t("submitting") : t("submit")}
               <Check className="w-6 h-6 group-hover:scale-110 transition-transform" />
             </button>
 
             <p className="text-sm text-muted-foreground text-center mt-6">
-              By registering, you agree to our{" "}
+              {t("terms_consent")}{" "}
               <a href="#" className="text-primary hover:underline">
-                Terms of Service
+                {t("terms_link")}
               </a>{" "}
-              and{" "}
+              {t("terms_and")}{" "}
               <a href="#" className="text-primary hover:underline">
-                Privacy Policy
+                {t("privacy_link")}
               </a>
             </p>
           </form>

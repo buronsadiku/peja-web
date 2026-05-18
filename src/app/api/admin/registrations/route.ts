@@ -87,7 +87,7 @@ export const GET = async (request: Request) => {
           json_agg(
             json_build_object(
               'id', ${activityOccurrences.id},
-              'name', ${activityTemplates.name},
+              'name', ${activityTemplates.nameEn},
               'startTime', ${activityOccurrences.startTime},
               'endTime', ${activityOccurrences.endTime}
             )

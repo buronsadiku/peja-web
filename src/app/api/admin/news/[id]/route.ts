@@ -11,8 +11,10 @@ const patchSchema = z.object({
     .min(1)
     .regex(/^[a-z0-9-]+$/)
     .optional(),
-  title: z.string().min(1).optional(),
-  body: z.string().min(1).optional(),
+  titleEn: z.string().min(1).optional(),
+  titleSq: z.string().nullable().optional(),
+  bodyEn: z.string().min(1).optional(),
+  bodySq: z.string().nullable().optional(),
   imageUrl: z.string().nullable().optional(),
   pinned: z.boolean().optional(),
   publishedAt: z.string().datetime().optional(),

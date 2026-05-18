@@ -1,4 +1,208 @@
 {
-  "home__title": "Peja",
-  "errors__not_found": "Page not found"
+  "dates": {
+    "weekdays_long": "Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday",
+    "weekdays_short": "Sun|Mon|Tue|Wed|Thu|Fri|Sat",
+    "months_long": "January|February|March|April|May|June|July|August|September|October|November|December",
+    "months_short": "Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec"
+  },
+  "errors": {
+    "not_found": "Page not found",
+    "back_home": "Back to home"
+  },
+  "common": {
+    "loading": "Loading…",
+    "register_now": "Register Now",
+    "read_more": "Read more",
+    "read_less": "Read less",
+    "back": "Back",
+    "view_all_activities": "View All Activities",
+    "view_all_photos": "View All Photos",
+    "view_activities": "View Activities",
+    "see_program": "See this year's program",
+    "next": "Next",
+    "prev": "Previous",
+    "menu": "Menu"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "activities": "Activities",
+    "community": "Community",
+    "news": "News",
+    "gallery": "Gallery",
+    "register": "Register",
+    "lineup": "Lineup"
+  },
+  "footer": {
+    "tagline": "Kosovo's premier outdoor festival.",
+    "tagline_two": "Four days of unforgettable experiences.",
+    "quick_links": "Quick Links",
+    "contact": "Contact",
+    "rights": "© 2026 Peja Outdoor Festival. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
+  "hero": {
+    "date": "June 11-14, 2026",
+    "subtitle": "Four days of incredible activities and music in the heart of Kosovo"
+  },
+  "countdown": {
+    "days": "Days",
+    "hours": "Hours",
+    "min": "Min",
+    "sec": "Sec"
+  },
+  "quick_info": {
+    "when": "WHEN",
+    "when_value": "June 18-21, 2026",
+    "when_note": "4 Days of Activities",
+    "where": "WHERE",
+    "where_value": "Peja, Kosovo",
+    "where_note": "Festival Grounds",
+    "tickets": "TICKETS",
+    "tickets_value": "Free Entry",
+    "tickets_note": "Registration Required"
+  },
+  "headliners": {
+    "title": "HEADLINERS"
+  },
+  "lineup": {
+    "title": "LINEUP",
+    "year": "2026",
+    "subtitle": "Check out this year's headliners",
+    "headliner": "HEADLINER"
+  },
+  "memories": {
+    "title": "MEMORIES",
+    "subtitle": "Highlights from previous years"
+  },
+  "sponsors": {
+    "title_a": "SPONSORS",
+    "title_b": "& PARTNERS",
+    "subtitle": "Made possible by these wonderful organizations"
+  },
+  "cta": {
+    "title": "DON'T MISS OUT",
+    "subtitle": "Register now to secure your spot"
+  },
+  "about": {
+    "kicker": "About the festival",
+    "hero_a": "FOUR DAYS WHERE",
+    "hero_b": "MOUNTAINS MEET MUSIC",
+    "hero_lead": "Peja Outdoor Festival celebrates everything that makes western Kosovo unforgettable — its peaks, its people, its food, and the sound of a community that knows how to gather.",
+    "intro_title": "A festival that wears the city, not the other way around.",
+    "intro_p1": "Hike at sunrise, taste local plates at lunch, build something with your hands in the afternoon, then dance under the stars. That's the rhythm. Show up — the rest follows.",
+    "intro_p2": "We started Peja Outdoor as a small gathering between friends and local artists. It grew because the city did the heavy lifting: the streets, the valley, the people who keep showing up year after year.",
+    "find_title_a": "WHAT YOU'LL",
+    "find_title_b": "FIND",
+    "numbers_title_a": "FESTIVAL",
+    "numbers_title_b": "IN NUMBERS",
+    "outro_title": "Come for a day. Stay for four.",
+    "outro_subtitle": "Registration is free. Spots are limited per activity.",
+    "stat_visitors_value": "5,000+",
+    "stat_visitors_label": "Visitors expected across 4 days",
+    "stat_activities_value": "60+",
+    "stat_activities_label": "Activities and workshops",
+    "stat_artists_value": "20+",
+    "stat_artists_label": "Artists and performers",
+    "stat_days_value": "4",
+    "stat_days_label": "Days, from sunrise to late night",
+    "pillar_nature_title": "Wild Nature",
+    "pillar_nature_body": "Rugel Valley, Rugova canyon, peaks of the Accursed Mountains — Peja sits where alpine meets Balkan.",
+    "pillar_sound_title": "Live Sound",
+    "pillar_sound_body": "Local and international acts across multiple stages, day and night, indoors and under open sky.",
+    "pillar_workshops_title": "Workshops & Craft",
+    "pillar_workshops_body": "Hands-on sessions in food, art, traditional craft, wellness and adventure — pick what speaks to you.",
+    "pillar_community_title": "Community",
+    "pillar_community_body": "Built by locals, open to the world. A meeting point for travelers, artists and the city of Peja itself."
+  },
+  "community": {
+    "title_a": "OUTDOOR",
+    "title_b": "COMMUNITY",
+    "subtitle": "The clubs, collectives and crews that make Peja Outdoor possible.",
+    "empty": "No communities yet. Check back soon.",
+    "load_error": "Failed to load. Try again later.",
+    "not_found_title": "Community not found",
+    "back_to_list": "Back to communities"
+  },
+  "activities": {
+    "hero_a": "FESTIVAL",
+    "hero_b": "ACTIVITIES",
+    "subtitle": "Join us for incredible experiences across the festival",
+    "load_error": "Failed to load activities. Try again later.",
+    "loading": "Loading activities…",
+    "categories": "Categories",
+    "cards": "Cards",
+    "timeline": "Timeline",
+    "all": "All",
+    "all_days": "All Days",
+    "filter_by_day": "Filter activities by day",
+    "ready_title": "Ready to Join?",
+    "ready_subtitle": "Register now to participate in all activities",
+    "back_all": "Back to all activities",
+    "about_activity": "About this activity",
+    "contact": "Contact",
+    "gallery": "Gallery",
+    "schedule": "Schedule",
+    "spots_left": "{n} of {capacity} spots left",
+    "full": "Full",
+    "meeting_point": "Meeting point",
+    "location": "Location"
+  },
+  "news": {
+    "hero_a": "FESTIVAL",
+    "hero_b": "NEWS",
+    "subtitle": "Latest updates from Peja Outdoor Festival",
+    "loading": "Loading…",
+    "empty": "No news yet. Check back soon.",
+    "not_found_title": "Post not found",
+    "back_to_list": "Back to news"
+  },
+  "gallery": {
+    "hero_a": "FESTIVAL",
+    "hero_b": "GALLERY",
+    "subtitle": "Moments captured across the festival",
+    "loading": "Loading photos…",
+    "empty": "No photos yet.",
+    "all": "All",
+    "section_live": "Live",
+    "section_workshops": "Workshops",
+    "section_adventures": "Adventures",
+    "section_food": "Food & Wine"
+  },
+  "register": {
+    "hero_a": "REGISTER",
+    "hero_b": "NOW",
+    "subtitle": "One registration per email per day. Choose your day, then your activities.",
+    "step_select_day": "1. Select Day",
+    "step_personal_info": "2. Personal Information",
+    "step_select_activities": "3. Select Activities",
+    "step_terms": "4. Terms & Commitment",
+    "loading_dates": "Loading dates…",
+    "loading_activities": "Loading activities…",
+    "pick_day_first": "Pick a day above to see activities.",
+    "no_activities": "No activities for this day yet.",
+    "email_label": "Email Address",
+    "email_placeholder": "your@email.com",
+    "email_autofilled": "Auto-filled from prior registration. Edit if needed.",
+    "name_label": "Full Name",
+    "name_placeholder": "Enter your full name",
+    "phone_label": "Phone Number",
+    "phone_placeholder": "+383 XX XXX XXX",
+    "liability_title": "Liability & responsibility",
+    "liability_body": "I accept full responsibility for any injuries or accidents during festival activities. I participate at my own risk and will not hold organizers liable.",
+    "commitment_title": "Commitment to attend",
+    "commitment_body": "I commit to showing up for the activities I've registered for. Spots are limited and my no-show prevents others from joining.",
+    "submitting": "Submitting…",
+    "submit": "Complete Registration",
+    "submission_failed": "Submission failed.",
+    "submission_failed_retry": "Submission failed. Try again.",
+    "registered_title": "REGISTERED!",
+    "registered_body": "You're in for {date}. A confirmation email is on its way.",
+    "register_another": "Register Another Day",
+    "terms_consent": "By registering, you agree to our",
+    "terms_link": "Terms of Service",
+    "privacy_link": "Privacy Policy",
+    "terms_and": "and"
+  }
 }

@@ -6,21 +6,23 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Images, Plus, Trash2, Upload } from "lucide-react";
+import { Images, Plus, Star, Trash2, Upload } from "lucide-react";
 import {
   adminApi,
   type GalleryRow,
   type GallerySection,
+  type PaginatedResponse,
 } from "../lib/admin-api";
 
 const PAGE_LIMIT = 20;
 
 const sections: GallerySection[] = ["live", "workshops", "adventures", "food"];
 
-type SectionFilter = "all" | GallerySection;
+type SectionFilter = "all" | "landing" | GallerySection;
 
 const sectionFilters: { value: SectionFilter; label: string }[] = [
   { value: "all", label: "All" },
+  { value: "landing", label: "On Landing" },
   { value: "live", label: "Live" },
   { value: "workshops", label: "Workshops" },
   { value: "adventures", label: "Adventures" },
@@ -40,7 +42,9 @@ export const AdminGalleryPage = () => {
       adminApi.gallery.list({
         page: pageParam,
         limit: PAGE_LIMIT,
-        section: filter === "all" ? undefined : filter,
+        section:
+          filter === "all" || filter === "landing" ? undefined : filter,
+        showOnLanding: filter === "landing" ? true : undefined,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -191,9 +195,58 @@ const GalleryCard = ({
   onUpdated: () => void;
 }) => {
   const [editing, setEditing] = useState(false);
+  const queryClient = useQueryClient();
+  const toggleLanding = useMutation({
+    mutationFn: (next: boolean) =>
+      adminApi.gallery.update(item.id, { showOnLanding: next }),
+    onMutate: async (next) => {
+      await queryClient.cancelQueries({ queryKey: ["admin", "gallery"] });
+      queryClient.setQueriesData<{
+        pages: PaginatedResponse<GalleryRow>[];
+        pageParams: unknown[];
+      }>({ queryKey: ["admin", "gallery"] }, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((p) => ({
+            ...p,
+            data: p.data.map((row) =>
+              row.id === item.id ? { ...row, showOnLanding: next } : row,
+            ),
+          })),
+        };
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gallery"] });
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "gallery"] });
+    },
+  });
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
+    <div className="bg-card border border-border rounded-xl overflow-hidden relative">
       <img src={item.url} alt={item.alt} className="w-full h-40 object-cover" />
+      <button
+        type="button"
+        onClick={() => toggleLanding.mutate(!item.showOnLanding)}
+        disabled={toggleLanding.isPending}
+        title={
+          item.showOnLanding
+            ? "On landing — click to remove"
+            : "Not on landing — click to add"
+        }
+        className={`absolute top-2 right-2 rounded-full p-1.5 border transition-all disabled:opacity-50 ${
+          item.showOnLanding
+            ? "bg-primary text-primary-foreground border-primary"
+            : "bg-background/80 text-foreground border-border hover:border-primary"
+        }`}
+      >
+        <Star
+          className="w-4 h-4"
+          fill={item.showOnLanding ? "currentColor" : "none"}
+        />
+      </button>
       <div className="p-3">
         {editing ? (
           <GalleryForm
@@ -251,6 +304,9 @@ const GalleryForm = ({
   const [caption, setCaption] = useState(item?.caption ?? "");
   const [section, setSection] = useState<GallerySection>(item?.section ?? "live");
   const [sortOrder, setSortOrder] = useState(String(item?.sortOrder ?? 0));
+  const [showOnLanding, setShowOnLanding] = useState(
+    item?.showOnLanding ?? false,
+  );
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -274,12 +330,18 @@ const GalleryForm = ({
 
   const create = useMutation({
     mutationFn: adminApi.gallery.create,
-    onSuccess: onSaved,
+    onSuccess: () => {
+      onSaved();
+      onClose();
+    },
   });
   const update = useMutation({
     mutationFn: ({ id, ...rest }: { id: string } & Partial<GalleryRow>) =>
       adminApi.gallery.update(id, rest),
-    onSuccess: onSaved,
+    onSuccess: () => {
+      onSaved();
+      onClose();
+    },
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -291,6 +353,7 @@ const GalleryForm = ({
       caption: caption || null,
       section,
       sortOrder: parseInt(sortOrder, 10) || 0,
+      showOnLanding,
     };
     if (item) {
       update.mutate({ id: item.id, ...payload });
@@ -380,6 +443,17 @@ const GalleryForm = ({
           className={`px-3 py-2 bg-background border border-border rounded-lg ${inline ? "text-xs" : ""}`}
         />
       </div>
+      <label
+        className={`flex items-center gap-2 cursor-pointer select-none ${inline ? "text-xs" : "text-sm"}`}
+      >
+        <input
+          type="checkbox"
+          checked={showOnLanding}
+          onChange={(e) => setShowOnLanding(e.target.checked)}
+          className="w-4 h-4 accent-primary"
+        />
+        <span>Show in landing page Memories section</span>
+      </label>
       <div className="flex gap-2">
         <button
           type="submit"

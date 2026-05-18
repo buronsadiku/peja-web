@@ -5,20 +5,17 @@ import { activityTemplates } from "@/lib/db/schema";
 import { requireAdminApi } from "@/lib/auth/api-guard";
 
 const createSchema = z.object({
-  name: z.string().min(1),
+  nameEn: z.string().min(1),
+  nameSq: z.string().nullable().optional(),
   slug: z
     .string()
     .min(1)
     .regex(/^[a-z0-9-]+$/, "slug must be lowercase letters/numbers/dashes"),
-  description: z.string().optional().nullable(),
-  category: z.enum([
-    "workshop",
-    "adventure",
-    "music",
-    "food",
-    "wellness",
-    "cultural",
-  ]),
+  descriptionEn: z.string().nullable().optional(),
+  descriptionSq: z.string().nullable().optional(),
+  contactPhone1: z.string().max(40).nullable().optional(),
+  contactPhone2: z.string().max(40).nullable().optional(),
+  category: z.string().min(1).regex(/^[a-z][a-z0-9_-]*$/),
 });
 
 export const GET = async (request: Request) => {

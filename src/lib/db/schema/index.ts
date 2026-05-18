@@ -1,5 +1,6 @@
 export * from './festival-days';
 export * from './activity-templates';
+export * from './activity-categories';
 export * from './activity-occurrences';
 export * from './activity-images';
 export * from './registrations';
@@ -7,4 +8,6 @@ export * from './registration-activities';
 export * from './gallery-images';
 export * from './news-posts';
 export * from './sponsors';
+export * from './communities';
+export * from './musicians';
 export * from './auth';

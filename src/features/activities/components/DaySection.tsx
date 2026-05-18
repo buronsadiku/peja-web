@@ -1,3 +1,6 @@
+"use client";
+
+import { useFormatDate } from "@/lib/i18n/useFormatDate";
 import type { ActivityListItem } from "@/lib/api/types";
 import { ActivityCard } from "./ActivityCard";
 
@@ -7,34 +10,29 @@ type DaySectionProps = {
   activities: ActivityListItem[];
 };
 
-const formatDateLabel = (date: string) => {
+export const DaySection = ({ date, label, activities }: DaySectionProps) => {
+  const formatDate = useFormatDate();
+  if (activities.length === 0) return null;
+
   const d = new Date(date + "T00:00:00");
-  return d.toLocaleDateString("en-US", {
+  const weekday = formatDate(d, { weekday: "long" }).toUpperCase();
+  const longDate = formatDate(d, {
     weekday: "long",
     month: "long",
     day: "numeric",
   });
-};
-
-const dayName = (date: string) => {
-  const d = new Date(date + "T00:00:00");
-  return d.toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
-};
-
-export const DaySection = ({ date, label, activities }: DaySectionProps) => {
-  if (activities.length === 0) return null;
 
   return (
     <div className="mb-20">
       <div className="flex items-center gap-4 mb-8">
         <div className="flex-1 h-px bg-border" />
         <h2 className="text-4xl md:text-5xl font-black text-primary">
-          {label ?? dayName(date)}
+          {label ?? weekday}
         </h2>
         <div className="flex-1 h-px bg-border" />
       </div>
       <p className="text-center text-xl text-muted-foreground mb-12">
-        {formatDateLabel(date)}
+        {longDate}
       </p>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {activities.map((activity) => (

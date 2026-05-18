@@ -10,8 +10,10 @@ const createSchema = z.object({
     .string()
     .min(1)
     .regex(/^[a-z0-9-]+$/, "slug must be lowercase letters/numbers/dashes"),
-  title: z.string().min(1),
-  body: z.string().min(1),
+  titleEn: z.string().min(1),
+  titleSq: z.string().nullable().optional(),
+  bodyEn: z.string().min(1),
+  bodySq: z.string().nullable().optional(),
   imageUrl: z.string().nullable().optional(),
   pinned: z.boolean().default(false),
   publishedAt: z.string().datetime().optional(),

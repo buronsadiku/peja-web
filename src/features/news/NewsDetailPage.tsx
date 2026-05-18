@@ -1,28 +1,38 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useLocale } from "next-intl";
 import { ArrowLeft, Pin } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { api } from "@/lib/api/client";
-
-const formatDate = (s: string) =>
-  new Date(s).toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+import { useFormatDate } from "@/lib/i18n/useFormatDate";
+import { Skeleton, SkeletonText } from "@/features/layout/Skeleton";
 
 export const NewsDetailPage = ({ slug }: { slug: string }) => {
+  const locale = useLocale();
+  const fmt = useFormatDate();
+  const formatDate = (s: string) =>
+    fmt(new Date(s), {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
   const postQuery = useQuery({
-    queryKey: ["news", slug],
-    queryFn: () => api.news.bySlug(slug),
+    queryKey: ["news", slug, locale],
+    queryFn: () => api.news.bySlug(slug, locale),
   });
 
   if (postQuery.isLoading) {
     return (
-      <div className="pt-24 min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Loading…</p>
+      <div className="pt-24 min-h-screen">
+        <div className="max-w-3xl mx-auto px-4 py-12 space-y-6">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-12 w-3/4" />
+          <Skeleton className="h-72 w-full rounded-2xl" />
+          <SkeletonText lines={6} />
+        </div>
       </div>
     );
   }

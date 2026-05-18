@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api/client";
 
 const tierClass: Record<string, string> = {
@@ -10,6 +11,7 @@ const tierClass: Record<string, string> = {
 };
 
 export const SponsorsSection = () => {
+  const t = useTranslations("sponsors");
   const sponsorsQuery = useQuery({
     queryKey: ["sponsors"],
     queryFn: () => api.sponsors.list(),
@@ -23,11 +25,9 @@ export const SponsorsSection = () => {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-5xl font-black mb-2">
-            <span className="text-primary">SPONSORS</span> & PARTNERS
+            <span className="text-primary">{t("title_a")}</span> {t("title_b")}
           </h2>
-          <p className="text-muted-foreground">
-            Made possible by these wonderful organizations
-          </p>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">

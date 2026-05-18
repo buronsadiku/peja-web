@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 type FilterButtonConfig = {
   value: string;
   label: string;
@@ -39,10 +43,11 @@ export const DayFilterBar = ({
   onChange,
   buttons,
 }: DayFilterBarProps) => {
+  const t = useTranslations("activities");
   return (
     <div className="mb-12">
       <p className="text-center text-muted-foreground mb-6 text-lg">
-        Filter activities by day
+        {t("filter_by_day")}
       </p>
       <div className="flex flex-wrap justify-center gap-4">
         {buttons.map((b) => (

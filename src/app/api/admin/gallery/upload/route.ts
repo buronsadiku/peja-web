@@ -1,17 +1,8 @@
 import { NextResponse } from "next/server";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { randomUUID } from "node:crypto";
 import { requireAdminApi } from "@/lib/auth/api-guard";
-import {
-  s3,
-  STORAGE_BUCKET,
-  STORAGE_PUBLIC_DOMAIN,
-} from "@/lib/storage/s3";
+import { uploadImageViaApi } from "@/lib/storage/upload-proxy";
 
-const MAX_BYTES = 10 * 1024 * 1024;
-
-const sanitizeFilename = (name: string) =>
-  name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-80);
+const MAX_BYTES = 20 * 1024 * 1024;
 
 export const POST = async (request: Request) => {
   const guard = await requireAdminApi(request);
@@ -36,19 +27,11 @@ export const POST = async (request: Request) => {
     );
   }
 
-  const key = `public/gallery/${randomUUID()}-${sanitizeFilename(file.name)}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-
-  await s3.send(
-    new PutObjectCommand({
-      Bucket: STORAGE_BUCKET,
-      Key: key,
-      Body: buffer,
-      ContentType: file.type,
-    }),
-  );
-
-  return NextResponse.json({
-    data: { publicUrl: `${STORAGE_PUBLIC_DOMAIN}/${key}` },
-  });
+  try {
+    const { publicUrl } = await uploadImageViaApi("gallery", file);
+    return NextResponse.json({ data: { publicUrl } });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ message }, { status: 502 });
+  }
 };

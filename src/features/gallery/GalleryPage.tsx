@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { api } from "@/lib/api/client";
+import { SkeletonGrid } from "@/features/layout/Skeleton";
 import type {
   GalleryImage,
   GallerySection as Section,
@@ -21,6 +23,7 @@ const PAGE_LIMIT = 30;
 const sections: Section[] = ["live", "workshops", "adventures", "food"];
 
 export const GalleryPage = () => {
+  const t = useTranslations("gallery");
   const [filter, setFilter] = useState<SectionFilter>("all");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -96,11 +99,11 @@ export const GalleryPage = () => {
       <section className="py-20 px-4 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-black mb-6">
-            FESTIVAL <span className="text-primary">GALLERY</span>
+            {t("hero_a")} <span className="text-primary">{t("hero_b")}</span>
           </h1>
           <div className="w-24 h-2 bg-primary mx-auto mb-8" />
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Relive the best moments from our previous festivals
+            {t("subtitle")}
           </p>
         </div>
       </section>
@@ -114,9 +117,7 @@ export const GalleryPage = () => {
           />
 
           {galleryQuery.isLoading ? (
-            <p className="text-center text-muted-foreground">
-              Loading gallery…
-            </p>
+            <SkeletonGrid count={12} itemClass="h-64 rounded-2xl" />
           ) : galleryQuery.isError ? (
             <p className="text-center text-destructive">
               Failed to load gallery.

@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 type CtaSectionProps = {
@@ -9,16 +10,15 @@ type CtaSectionProps = {
 };
 
 export const CtaSection = ({
-  title = "DON'T MISS OUT",
-  subtitle = "Register now to secure your spot",
-  ctaLabel = "Register Now",
+  title,
+  subtitle,
+  ctaLabel,
   withBackdrop = true,
 }: CtaSectionProps) => {
+  const t = useTranslations("cta");
+  const tc = useTranslations("common");
   return (
-    <section
-      id="about"
-      className="py-32 px-4 bg-background relative overflow-hidden"
-    >
+    <section className="py-32 px-4 bg-background relative overflow-hidden">
       {withBackdrop && (
         <div className="absolute inset-0">
           <img
@@ -30,15 +30,17 @@ export const CtaSection = ({
       )}
 
       <div className="max-w-4xl mx-auto text-center relative z-10">
-        <h2 className="text-5xl md:text-7xl font-black mb-8">{title}</h2>
+        <h2 className="text-5xl md:text-7xl font-black mb-8">
+          {title ?? t("title")}
+        </h2>
         <p className="text-2xl md:text-3xl mb-12 text-muted-foreground">
-          {subtitle}
+          {subtitle ?? t("subtitle")}
         </p>
         <Link
           href="/register"
           className="bg-primary text-primary-foreground px-16 py-6 rounded-full text-xl hover:bg-primary/90 transition-all inline-flex items-center gap-3 group shadow-lg shadow-primary/50"
         >
-          {ctaLabel}
+          {ctaLabel ?? tc("register_now")}
           <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
         </Link>
       </div>

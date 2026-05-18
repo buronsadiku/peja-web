@@ -143,10 +143,7 @@ export const AdminFestivalDaysPage = () => {
         <div className="space-y-3">
           {days
             .slice()
-            .sort(
-              (a, b) =>
-                a.sortOrder - b.sortOrder || a.date.localeCompare(b.date),
-            )
+            .sort((a, b) => a.date.localeCompare(b.date))
             .map((day) =>
               editing === day.id ? (
                 <DayEditForm

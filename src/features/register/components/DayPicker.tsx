@@ -1,3 +1,6 @@
+"use client";
+
+import { useFormatDate } from "@/lib/i18n/useFormatDate";
 import type { FestivalDay } from "@/lib/api/types";
 
 type DayPickerProps = {
@@ -6,19 +9,14 @@ type DayPickerProps = {
   onChange: (festivalDayId: string) => void;
 };
 
-const formatDay = (date: string) => {
-  const d = new Date(date + "T00:00:00");
-  return {
-    weekday: d.toLocaleDateString("en-US", { weekday: "long" }),
-    monthDay: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-  };
-};
-
 export const DayPicker = ({ days, selectedId, onChange }: DayPickerProps) => {
+  const formatDate = useFormatDate();
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {days.map((day) => {
-        const { weekday, monthDay } = formatDay(day.date);
+        const d = new Date(day.date + "T00:00:00");
+        const weekday = formatDate(d, { weekday: "long" });
+        const monthDay = formatDate(d, { month: "short", day: "numeric" });
         const active = selectedId === day.id;
         return (
           <button

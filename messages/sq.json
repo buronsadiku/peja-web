@@ -1,4 +1,208 @@
 {
-  "home__title": "Peja",
-  "errors__not_found": "Faqja nuk u gjet"
+  "dates": {
+    "weekdays_long": "E diel|E hënë|E martë|E mërkurë|E enjte|E premte|E shtunë",
+    "weekdays_short": "Die|Hën|Mar|Mër|Enj|Pre|Sht",
+    "months_long": "Janar|Shkurt|Mars|Prill|Maj|Qershor|Korrik|Gusht|Shtator|Tetor|Nëntor|Dhjetor",
+    "months_short": "Jan|Shk|Mar|Pri|Maj|Qer|Kor|Gus|Sht|Tet|Nën|Dhj"
+  },
+  "errors": {
+    "not_found": "Faqja nuk u gjet",
+    "back_home": "Kthehu te faqja kryesore"
+  },
+  "common": {
+    "loading": "Duke u ngarkuar…",
+    "register_now": "Regjistrohu tani",
+    "read_more": "Lexo më shumë",
+    "read_less": "Lexo më pak",
+    "back": "Kthehu",
+    "view_all_activities": "Shih të gjitha aktivitetet",
+    "view_all_photos": "Shih të gjitha fotot",
+    "view_activities": "Shih aktivitetet",
+    "see_program": "Shih programin e këtij viti",
+    "next": "Vazhdo",
+    "prev": "Mbrapa",
+    "menu": "Menyja"
+  },
+  "nav": {
+    "home": "Ballina",
+    "about": "Rreth nesh",
+    "activities": "Aktivitete",
+    "community": "Komuniteti",
+    "news": "Lajme",
+    "gallery": "Galeria",
+    "register": "Regjistrohu",
+    "lineup": "Lineup"
+  },
+  "footer": {
+    "tagline": "Festivali kryesor i aktiviteteve në natyrë në Kosovë.",
+    "tagline_two": "Katër ditë me përvoja të paharrueshme.",
+    "quick_links": "Lidhje të shpejta",
+    "contact": "Kontakti",
+    "rights": "© 2026 Peja Outdoor Festival. Të gjitha të drejtat e rezervuara.",
+    "privacy": "Politika e privatësisë",
+    "terms": "Kushtet e shërbimit"
+  },
+  "hero": {
+    "date": "11-14 qershor 2026",
+    "subtitle": "Katër ditë me aktivitete dhe muzikë në zemër të Kosovës"
+  },
+  "countdown": {
+    "days": "Ditë",
+    "hours": "Orë",
+    "min": "Min",
+    "sec": "Sek"
+  },
+  "quick_info": {
+    "when": "KUR",
+    "when_value": "18-21 qershor 2026",
+    "when_note": "4 ditë aktivitete",
+    "where": "KU",
+    "where_value": "Pejë, Kosovë",
+    "where_note": "Sheshet e festivalit",
+    "tickets": "BILETAT",
+    "tickets_value": "Hyrje e lirë",
+    "tickets_note": "Kërkohet regjistrim"
+  },
+  "headliners": {
+    "title": "TË FTUARIT KRYESORË"
+  },
+  "lineup": {
+    "title": "LINEUP",
+    "year": "2026",
+    "subtitle": "Shihni të ftuarit e këtij viti",
+    "headliner": "I FTUAR"
+  },
+  "memories": {
+    "title": "KUJTIME",
+    "subtitle": "Momentet më të bukura nga vitet e kaluara"
+  },
+  "sponsors": {
+    "title_a": "SPONSORËT",
+    "title_b": "DHE PARTNERËT",
+    "subtitle": "I bërë i mundur nga këto organizata të mrekullueshme"
+  },
+  "cta": {
+    "title": "MOS E HUMB",
+    "subtitle": "Regjistrohu tani për të siguruar vendin tënd"
+  },
+  "about": {
+    "kicker": "Rreth festivalit",
+    "hero_a": "KATËR DITË KU",
+    "hero_b": "MALET TAKOJNË MUZIKËN",
+    "hero_lead": "Peja Outdoor Festival feston gjithçka që e bën Kosovën perëndimore të paharrueshme — majat e maleve, njerëzit, ushqimin dhe zërin e një komuniteti që di si të mblidhet.",
+    "intro_title": "Një festival që e vesh qytetin, jo e kundërta.",
+    "intro_p1": "Ngjitu në lindje të diellit, shijo pjatat lokale për drekë, ndërto diçka me duart e tua pasdite, pastaj kërce nën yje. Ky është ritmi. Eja — pjesa tjetër vjen vetë.",
+    "intro_p2": "Peja Outdoor lindi si një tubim i vogël mes miqsh dhe artistësh lokalë. U rrit sepse qyteti e mbajti peshën: rrugët, lugina, njerëzit që vijnë çdo vit.",
+    "find_title_a": "ÇKA DO TË",
+    "find_title_b": "GJESH",
+    "numbers_title_a": "FESTIVALI",
+    "numbers_title_b": "NË SHIFRA",
+    "outro_title": "Eja për një ditë. Qëndro për katër.",
+    "outro_subtitle": "Regjistrimi është falas. Vendet janë të kufizuara për çdo aktivitet.",
+    "stat_visitors_value": "5,000+",
+    "stat_visitors_label": "Vizitorë të pritur gjatë 4 ditëve",
+    "stat_activities_value": "60+",
+    "stat_activities_label": "Aktivitete dhe punëtori",
+    "stat_artists_value": "20+",
+    "stat_artists_label": "Artistë dhe performues",
+    "stat_days_value": "4",
+    "stat_days_label": "Ditë, nga lindja e diellit deri vonë në mbrëmje",
+    "pillar_nature_title": "Natyrë e egër",
+    "pillar_nature_body": "Lugina e Rugovës, kanioni i Rugovës, majat e Bjeshkëve të Nemuna — Peja ndodhet aty ku Alpet takojnë Ballkanin.",
+    "pillar_sound_title": "Muzikë e drejtpërdrejtë",
+    "pillar_sound_body": "Artistë lokalë dhe ndërkombëtarë në skena të ndryshme, ditë e natë, nën çati dhe nën qiell të hapur.",
+    "pillar_workshops_title": "Punëtori dhe zanate",
+    "pillar_workshops_body": "Sesione praktike në ushqim, art, zeje tradicionale, mirëqenie dhe aventurë — zgjidh atë që të frymëzon.",
+    "pillar_community_title": "Komuniteti",
+    "pillar_community_body": "I ndërtuar nga vendasit, i hapur për botën. Një vend takimi për udhëtarë, artistë dhe vetë qytetin e Pejës."
+  },
+  "community": {
+    "title_a": "KOMUNITETI",
+    "title_b": "I NATYRËS",
+    "subtitle": "Klubet, kolektivat dhe grupet që e bëjnë të mundur Peja Outdoor.",
+    "empty": "Ende pa komunitete. Kthehu së shpejti.",
+    "load_error": "Ngarkimi dështoi. Provo më vonë.",
+    "not_found_title": "Komuniteti nuk u gjet",
+    "back_to_list": "Kthehu te komunitetet"
+  },
+  "activities": {
+    "hero_a": "AKTIVITETET",
+    "hero_b": "E FESTIVALIT",
+    "subtitle": "Bashkohu për përvoja të jashtëzakonshme në festival",
+    "load_error": "Ngarkimi i aktiviteteve dështoi. Provo më vonë.",
+    "loading": "Duke ngarkuar aktivitetet…",
+    "categories": "Kategoritë",
+    "cards": "Kartela",
+    "timeline": "Orari",
+    "all": "Të gjitha",
+    "all_days": "Të gjitha ditët",
+    "filter_by_day": "Filtro aktivitetet sipas ditës",
+    "ready_title": "Gati të bashkohesh?",
+    "ready_subtitle": "Regjistrohu tani për të marrë pjesë në të gjitha aktivitetet",
+    "back_all": "Kthehu te aktivitetet",
+    "about_activity": "Rreth këtij aktiviteti",
+    "contact": "Kontakti",
+    "gallery": "Galeria",
+    "schedule": "Orari",
+    "spots_left": "{n} nga {capacity} vende të lira",
+    "full": "I mbushur",
+    "meeting_point": "Pika e takimit",
+    "location": "Lokacioni"
+  },
+  "news": {
+    "hero_a": "LAJMET",
+    "hero_b": "E FESTIVALIT",
+    "subtitle": "Përditësimet më të reja nga Peja Outdoor Festival",
+    "loading": "Duke u ngarkuar…",
+    "empty": "Ende pa lajme. Kthehu së shpejti.",
+    "not_found_title": "Postimi nuk u gjet",
+    "back_to_list": "Kthehu te lajmet"
+  },
+  "gallery": {
+    "hero_a": "GALERIA",
+    "hero_b": "E FESTIVALIT",
+    "subtitle": "Momentet e festivalit në një vend",
+    "loading": "Duke ngarkuar fotot…",
+    "empty": "Ende pa foto.",
+    "all": "Të gjitha",
+    "section_live": "Live",
+    "section_workshops": "Punëtori",
+    "section_adventures": "Aventura",
+    "section_food": "Ushqim & Verë"
+  },
+  "register": {
+    "hero_a": "REGJISTROHU",
+    "hero_b": "TANI",
+    "subtitle": "Një regjistrim për email për ditë. Zgjidh ditën, pastaj aktivitetet.",
+    "step_select_day": "1. Zgjidh ditën",
+    "step_personal_info": "2. Të dhënat personale",
+    "step_select_activities": "3. Zgjidh aktivitetet",
+    "step_terms": "4. Kushtet dhe zotimi",
+    "loading_dates": "Duke ngarkuar datat…",
+    "loading_activities": "Duke ngarkuar aktivitetet…",
+    "pick_day_first": "Zgjidh një ditë më lart për të parë aktivitetet.",
+    "no_activities": "Asnjë aktivitet për këtë ditë ende.",
+    "email_label": "Adresa email",
+    "email_placeholder": "tjotja@email.com",
+    "email_autofilled": "Plotësuar automatikisht nga regjistrimi i mëparshëm. Ndrysho nëse duhet.",
+    "name_label": "Emri i plotë",
+    "name_placeholder": "Shkruaj emrin tënd të plotë",
+    "phone_label": "Numri i telefonit",
+    "phone_placeholder": "+383 XX XXX XXX",
+    "liability_title": "Përgjegjësia",
+    "liability_body": "Marr përgjegjësi të plotë për çdo lëndim apo aksident gjatë aktiviteteve të festivalit. Marr pjesë në rrezikun tim dhe nuk i mbaj organizatorët përgjegjës.",
+    "commitment_title": "Zotim për pjesëmarrje",
+    "commitment_body": "Zotohem të paraqitem për aktivitetet ku jam regjistruar. Vendet janë të kufizuara dhe mungesa ime ua heq mundësinë të tjerëve.",
+    "submitting": "Duke dërguar…",
+    "submit": "Përfundo regjistrimin",
+    "submission_failed": "Dërgimi dështoi.",
+    "submission_failed_retry": "Dërgimi dështoi. Provo përsëri.",
+    "registered_title": "U REGJISTROVE!",
+    "registered_body": "Je brenda për {date}. Emaili i konfirmimit po vjen.",
+    "register_another": "Regjistrohu për një ditë tjetër",
+    "terms_consent": "Duke u regjistruar, pranon",
+    "terms_link": "Kushtet e shërbimit",
+    "privacy_link": "Politikën e privatësisë",
+    "terms_and": "dhe"
+  }
 }

@@ -83,14 +83,17 @@ export const AdminNewsPage = () => {
                     {post.pinned ? (
                       <Pin className="w-4 h-4 text-primary" />
                     ) : null}
-                    <h3 className="font-bold text-lg">{post.title}</h3>
+                    <h3 className="font-bold text-lg">{post.titleEn}</h3>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">
                     {post.slug} ·{" "}
                     {new Date(post.publishedAt).toLocaleString()}
+                    {post.titleSq ? (
+                      <span className="ml-2">· SQ: {post.titleSq}</span>
+                    ) : null}
                   </p>
                   <p className="text-sm text-muted-foreground line-clamp-2">
-                    {post.body}
+                    {post.bodyEn}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -102,7 +105,7 @@ export const AdminNewsPage = () => {
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm(`Delete "${post.title}"?`))
+                      if (confirm(`Delete "${post.titleEn}"?`))
                         deleteRow.mutate(post.id);
                     }}
                     className="p-2 hover:bg-destructive/10 text-destructive rounded-lg"
@@ -129,8 +132,10 @@ const NewsForm = ({
   onSaved: () => void;
 }) => {
   const [slug, setSlug] = useState(post?.slug ?? "");
-  const [title, setTitle] = useState(post?.title ?? "");
-  const [body, setBody] = useState(post?.body ?? "");
+  const [titleEn, setTitleEn] = useState(post?.titleEn ?? "");
+  const [titleSq, setTitleSq] = useState(post?.titleSq ?? "");
+  const [bodyEn, setBodyEn] = useState(post?.bodyEn ?? "");
+  const [bodySq, setBodySq] = useState(post?.bodySq ?? "");
   const [imageUrl, setImageUrl] = useState(post?.imageUrl ?? "");
   const [pinned, setPinned] = useState(post?.pinned ?? false);
 
@@ -147,8 +152,10 @@ const NewsForm = ({
     mutationFn: () =>
       newsAdminApi.update(post!.id, {
         slug,
-        title,
-        body,
+        titleEn,
+        titleSq: titleSq || null,
+        bodyEn,
+        bodySq: bodySq || null,
         imageUrl: imageUrl || null,
         pinned,
       }),
@@ -165,8 +172,10 @@ const NewsForm = ({
     else
       create.mutate({
         slug,
-        title,
-        body,
+        titleEn,
+        titleSq: titleSq || null,
+        bodyEn,
+        bodySq: bodySq || null,
         imageUrl: imageUrl || null,
         pinned,
       });
@@ -177,30 +186,65 @@ const NewsForm = ({
       onSubmit={handleSubmit}
       className="bg-card border-2 border-primary rounded-xl p-5 mb-6 space-y-3"
     >
-      <div className="grid md:grid-cols-2 gap-3">
-        <input
-          required
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
-          className="px-4 py-2 bg-background border border-border rounded-lg"
-        />
-        <input
-          required
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          placeholder="slug-like-this"
-          className="px-4 py-2 bg-background border border-border rounded-lg"
-        />
-      </div>
-      <textarea
+      <input
         required
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        placeholder="Body"
-        rows={6}
+        value={slug}
+        onChange={(e) => setSlug(e.target.value)}
+        placeholder="slug-like-this (shared across locales)"
         className="w-full px-4 py-2 bg-background border border-border rounded-lg"
       />
+      <div className="grid md:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs uppercase text-muted-foreground tracking-wider font-bold">
+            Title · English (required)
+          </label>
+          <input
+            required
+            value={titleEn}
+            onChange={(e) => setTitleEn(e.target.value)}
+            placeholder="Title in English"
+            className="w-full px-4 py-2 bg-background border border-border rounded-lg"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs uppercase text-muted-foreground tracking-wider font-bold">
+            Title · Albanian (optional)
+          </label>
+          <input
+            value={titleSq}
+            onChange={(e) => setTitleSq(e.target.value)}
+            placeholder="Titulli në shqip"
+            className="w-full px-4 py-2 bg-background border border-border rounded-lg"
+          />
+        </div>
+      </div>
+      <div className="grid md:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs uppercase text-muted-foreground tracking-wider font-bold">
+            Body · English (required)
+          </label>
+          <textarea
+            required
+            value={bodyEn}
+            onChange={(e) => setBodyEn(e.target.value)}
+            placeholder="Body in English"
+            rows={6}
+            className="w-full px-4 py-2 bg-background border border-border rounded-lg"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs uppercase text-muted-foreground tracking-wider font-bold">
+            Body · Albanian (optional)
+          </label>
+          <textarea
+            value={bodySq}
+            onChange={(e) => setBodySq(e.target.value)}
+            placeholder="Përmbajtja në shqip"
+            rows={6}
+            className="w-full px-4 py-2 bg-background border border-border rounded-lg"
+          />
+        </div>
+      </div>
       <input
         value={imageUrl}
         onChange={(e) => setImageUrl(e.target.value)}

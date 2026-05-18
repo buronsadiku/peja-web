@@ -2,26 +2,31 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocale, useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, Pin } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { api } from "@/lib/api/client";
+import { useFormatDate } from "@/lib/i18n/useFormatDate";
+import { Skeleton, SkeletonText } from "@/features/layout/Skeleton";
 
 const PAGE_LIMIT = 12;
 
-const formatDate = (s: string) =>
-  new Date(s).toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-
 export const NewsPage = () => {
+  const locale = useLocale();
+  const fmt = useFormatDate();
+  const formatDate = (s: string) =>
+    fmt(new Date(s), {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  const t = useTranslations("news");
   const [page, setPage] = useState(1);
 
   const newsQuery = useQuery({
-    queryKey: ["news", page],
-    queryFn: () => api.news.list({ page, limit: PAGE_LIMIT }),
+    queryKey: ["news", page, locale],
+    queryFn: () => api.news.list({ page, limit: PAGE_LIMIT, locale }),
   });
 
   const posts = newsQuery.data?.data ?? [];
@@ -32,11 +37,11 @@ export const NewsPage = () => {
       <section className="py-20 px-4 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-black mb-6">
-            FESTIVAL <span className="text-primary">NEWS</span>
+            {t("hero_a")} <span className="text-primary">{t("hero_b")}</span>
           </h1>
           <div className="w-24 h-2 bg-primary mx-auto mb-8" />
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Announcements, updates, and live posts from the festival team.
+            {t("subtitle")}
           </p>
         </div>
       </section>
@@ -44,11 +49,23 @@ export const NewsPage = () => {
       <section className="py-16 px-4">
         <div className="max-w-5xl mx-auto">
           {newsQuery.isLoading ? (
-            <p className="text-center text-muted-foreground">Loading…</p>
+            <div className="space-y-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-card border border-border rounded-2xl overflow-hidden grid md:grid-cols-3 gap-6"
+                >
+                  <Skeleton className="h-48 md:h-full rounded-none" />
+                  <div className="p-6 md:col-span-2 space-y-3">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-7 w-3/4" />
+                    <SkeletonText lines={3} />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : posts.length === 0 ? (
-            <p className="text-center text-muted-foreground">
-              No news yet. Check back soon.
-            </p>
+            <p className="text-center text-muted-foreground">{t("empty")}</p>
           ) : (
             <div className="space-y-6">
               {posts.map((post) => (

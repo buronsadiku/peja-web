@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api/client";
 
 const calc = (target: Date) => {
@@ -15,6 +16,7 @@ const calc = (target: Date) => {
 };
 
 export const Countdown = () => {
+  const t = useTranslations("countdown");
   const daysQuery = useQuery({
     queryKey: ["festival-days"],
     queryFn: () => api.activities.festivalDays(),
@@ -35,10 +37,10 @@ export const Countdown = () => {
 
   const ready = !!startDate && !!time;
   const cells = [
-    { value: time?.days ?? 0, label: "Days" },
-    { value: time?.hours ?? 0, label: "Hours" },
-    { value: time?.minutes ?? 0, label: "Min" },
-    { value: time?.seconds ?? 0, label: "Sec" },
+    { value: time?.days ?? 0, label: t("days") },
+    { value: time?.hours ?? 0, label: t("hours") },
+    { value: time?.minutes ?? 0, label: t("min") },
+    { value: time?.seconds ?? 0, label: t("sec") },
   ];
 
   return (

@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth/client";
+import { BrandLogo } from "@/features/layout/BrandLogo";
 
 const links = [
   { href: "/admin/festival-days", label: "Festival Days" },
   { href: "/admin/activities", label: "Activities" },
+  { href: "/admin/musicians", label: "Lineup" },
   { href: "/admin/gallery", label: "Gallery" },
   { href: "/admin/news", label: "News" },
   { href: "/admin/sponsors", label: "Sponsors" },
+  { href: "/admin/community", label: "Community" },
   { href: "/admin/registrations", label: "Registrations" },
 ];
 
@@ -26,7 +29,7 @@ export const Sidebar = ({ adminEmail }: { adminEmail: string }) => {
   return (
     <aside className="w-64 min-h-screen bg-card border-r border-border p-6 flex flex-col">
       <Link href="/admin/activities" className="mb-10">
-        <h1 className="text-2xl font-black text-primary">PEJA.FEST</h1>
+        <BrandLogo className="h-10 w-auto aspect-[390/169] text-primary" />
         <p className="text-xs text-muted-foreground mt-1">Admin</p>
       </Link>
 

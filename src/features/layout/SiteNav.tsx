@@ -2,18 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
+import { BrandLogo } from "./BrandLogo";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/activities", label: "Activities" },
-  { href: "/news", label: "News" },
-  { href: "/gallery", label: "Gallery" },
+const navItems = [
+  { href: "/", key: "home" },
+  { href: "/about", key: "about" },
+  { href: "/activities", key: "activities" },
+  { href: "/community", key: "community" },
+  { href: "/news", key: "news" },
+  { href: "/gallery", key: "gallery" },
 ] as const;
 
 export const SiteNav = () => {
+  const t = useTranslations("nav");
+  const tc = useTranslations("common");
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -34,59 +40,44 @@ export const SiteNav = () => {
           : "bg-gradient-to-b from-black/50 to-transparent backdrop-blur-sm"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between h-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-4 h-20 xl:h-24">
           <Link
             href="/"
             className="flex-shrink-0 group cursor-pointer"
             onClick={() => setIsMenuOpen(false)}
           >
-            <h1 className="text-2xl md:text-3xl font-black text-primary group-hover:scale-105 transition-transform">
-              PEJA<span className="text-white">.</span>FEST
-            </h1>
+            <BrandLogo className="h-10 xl:h-12 w-auto aspect-[390/169] text-primary group-hover:scale-105 transition-transform" />
           </Link>
 
-          <div className="hidden md:flex items-center gap-12">
-            {navLinks.map((link) => (
+          <div className="hidden xl:flex items-center gap-8 min-w-0">
+            {navItems.map((item) => (
               <Link
-                key={link.href}
-                href={link.href}
-                className="relative text-foreground hover:text-primary transition-colors group py-2"
+                key={item.href}
+                href={item.href}
+                className="relative text-foreground hover:text-primary transition-colors group py-2 whitespace-nowrap"
               >
-                <span className="relative z-10">{link.label}</span>
+                <span className="relative z-10">{t(item.key)}</span>
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
               </Link>
             ))}
             {isHome && (
-              <>
-                <a
-                  href="#about"
-                  className="relative text-foreground hover:text-primary transition-colors group py-2"
-                >
-                  <span className="relative z-10">About</span>
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
-                </a>
-                <a
-                  href="#lineup"
-                  className="relative text-foreground hover:text-primary transition-colors group py-2"
-                >
-                  <span className="relative z-10">Lineup</span>
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
-                </a>
-                <a
-                  href="#info"
-                  className="relative text-foreground hover:text-primary transition-colors group py-2"
-                >
-                  <span className="relative z-10">Info</span>
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
-                </a>
-              </>
+              <a
+                href="#lineup"
+                className="relative text-foreground hover:text-primary transition-colors group py-2 whitespace-nowrap"
+              >
+                <span className="relative z-10">{t("lineup")}</span>
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+              </a>
             )}
+          </div>
+
+          <div className="hidden xl:flex items-center gap-4 flex-shrink-0">
             <Link
               href="/register"
-              className="relative bg-primary text-primary-foreground px-8 py-3 rounded-full hover:bg-primary/90 transition-all font-bold overflow-hidden group"
+              className="relative bg-primary text-primary-foreground px-8 py-2.5 rounded-full hover:bg-primary/90 transition-all font-bold overflow-hidden group whitespace-nowrap"
             >
-              <span className="relative z-10">Register</span>
+              <span className="relative z-10">{t("register")}</span>
               <span className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </Link>
             <ThemeToggle />
@@ -95,31 +86,31 @@ export const SiteNav = () => {
 
           <button
             onClick={() => setIsMenuOpen((v) => !v)}
-            className="md:hidden relative w-10 h-10 flex items-center justify-center text-foreground hover:text-primary transition-colors"
+            className="xl:hidden relative w-10 h-10 flex items-center justify-center text-foreground hover:text-primary transition-colors"
           >
-            <span className="sr-only">Menu</span>
+            <span className="sr-only">{tc("menu")}</span>
             {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
       </div>
 
       <div
-        className={`md:hidden overflow-hidden transition-all duration-500 ${
+        className={`xl:hidden overflow-hidden transition-all duration-500 ${
           isMenuOpen
-            ? "max-h-[500px] opacity-100"
+            ? "max-h-[600px] opacity-100"
             : "max-h-0 opacity-0"
         }`}
       >
         <div className="bg-card/98 backdrop-blur-xl border-t border-primary/20 shadow-2xl">
-          <div className="px-6 py-8 space-y-2">
-            {navLinks.map((link) => (
+          <div className="px-6 py-6 space-y-2">
+            {navItems.map((item) => (
               <Link
-                key={link.href}
-                href={link.href}
+                key={item.href}
+                href={item.href}
                 onClick={() => setIsMenuOpen(false)}
-                className="block w-full text-left py-4 px-4 text-lg hover:text-primary hover:bg-primary/10 rounded-xl transition-all border-l-4 border-transparent hover:border-primary"
+                className="block w-full text-left py-3 px-4 text-lg hover:text-primary hover:bg-primary/10 rounded-xl transition-all border-l-4 border-transparent hover:border-primary"
               >
-                {link.label}
+                {t(item.key)}
               </Link>
             ))}
             <Link
@@ -127,8 +118,12 @@ export const SiteNav = () => {
               onClick={() => setIsMenuOpen(false)}
               className="w-full block text-center bg-gradient-to-r from-primary to-secondary text-primary-foreground py-4 rounded-xl hover:shadow-lg hover:shadow-primary/50 transition-all font-bold mt-4"
             >
-              Register
+              {t("register")}
             </Link>
+            <div className="flex items-center justify-center gap-4 pt-4 border-t border-border mt-4">
+              <ThemeToggle />
+              <LocaleSwitcher />
+            </div>
           </div>
         </div>
       </div>

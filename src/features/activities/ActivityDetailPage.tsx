@@ -2,35 +2,51 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Calendar, Clock, Users } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { ArrowLeft, ArrowRight, Calendar, Clock, Phone, Users } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { api } from "@/lib/api/client";
+import { useFormatDate } from "@/lib/i18n/useFormatDate";
+import { Skeleton, SkeletonText } from "@/features/layout/Skeleton";
 import { MeetingPointMap } from "./components/MeetingPointMap";
-
-const formatDate = (date: string) => {
-  const d = new Date(date + "T00:00:00");
-  return d.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-};
 
 const formatTime = (t: string) => t.slice(0, 5);
 
 export const ActivityDetailPage = ({ slug }: { slug: string }) => {
+  const locale = useLocale();
+  const fmt = useFormatDate();
+  const formatDate = (date: string) =>
+    fmt(new Date(date + "T00:00:00"), {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  const t = useTranslations("activities");
+  const tc = useTranslations("common");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const detailQuery = useQuery({
-    queryKey: ["activity", slug],
-    queryFn: () => api.activities.bySlug(slug),
+    queryKey: ["activity", slug, locale],
+    queryFn: () => api.activities.bySlug(slug, locale),
   });
 
   if (detailQuery.isLoading) {
     return (
-      <div className="pt-24 min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Loading…</p>
+      <div className="pt-24 min-h-screen">
+        <Skeleton className="h-80 w-full rounded-none" />
+        <div className="max-w-5xl mx-auto px-4 py-12 space-y-6">
+          <Skeleton className="h-10 w-2/3" />
+          <Skeleton className="h-5 w-1/3" />
+          <div className="pt-6">
+            <SkeletonText lines={4} />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-40" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -93,21 +109,47 @@ export const ActivityDetailPage = ({ slug }: { slug: string }) => {
             href="/activities"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-8"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to all activities
+            <ArrowLeft className="w-4 h-4" /> {t("back_all")}
           </Link>
 
           {activity.description ? (
             <div className="bg-card border border-border rounded-2xl p-8 mb-10">
-              <h2 className="text-2xl font-black mb-4">About this activity</h2>
+              <h2 className="text-2xl font-black mb-4">{t("about_activity")}</h2>
               <p className="text-lg text-muted-foreground whitespace-pre-line">
                 {activity.description}
               </p>
             </div>
           ) : null}
 
+          {activity.contactPhone1 || activity.contactPhone2 ? (
+            <div className="bg-card border border-border rounded-2xl p-6 mb-10">
+              <h2 className="text-xl font-black mb-3 flex items-center gap-2">
+                <Phone className="w-5 h-5 text-primary" /> {t("contact")}
+              </h2>
+              <div className="flex flex-wrap gap-4">
+                {activity.contactPhone1 ? (
+                  <a
+                    href={`tel:${activity.contactPhone1.replace(/\s+/g, "")}`}
+                    className="text-lg font-bold text-primary hover:underline"
+                  >
+                    {activity.contactPhone1}
+                  </a>
+                ) : null}
+                {activity.contactPhone2 ? (
+                  <a
+                    href={`tel:${activity.contactPhone2.replace(/\s+/g, "")}`}
+                    className="text-lg font-bold text-primary hover:underline"
+                  >
+                    {activity.contactPhone2}
+                  </a>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
           {otherImages.length > 0 ? (
             <div className="mb-10">
-              <h2 className="text-2xl font-black mb-4">Gallery</h2>
+              <h2 className="text-2xl font-black mb-4">{t("gallery")}</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {otherImages.map((img, idx) => (
                   <button
@@ -129,7 +171,7 @@ export const ActivityDetailPage = ({ slug }: { slug: string }) => {
 
           {activity.occurrences.length > 0 ? (
             <div className="mb-10">
-              <h2 className="text-2xl font-black mb-4">Schedule</h2>
+              <h2 className="text-2xl font-black mb-4">{t("schedule")}</h2>
               <div className="space-y-4">
                 {activity.occurrences.map((o) => (
                   <div
@@ -139,7 +181,9 @@ export const ActivityDetailPage = ({ slug }: { slug: string }) => {
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <Calendar className="w-5 h-5 text-primary" />
-                        <p className="font-bold">{formatDate(o.date)}</p>
+                        <p className="font-bold">
+                          {formatDate(o.date)}
+                        </p>
                       </div>
                       <div className="flex items-center gap-2 mb-2 text-muted-foreground">
                         <Clock className="w-4 h-4" />

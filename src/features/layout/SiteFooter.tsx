@@ -1,82 +1,79 @@
 import { Facebook, Instagram, Twitter } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { BrandLogo } from "./BrandLogo";
 
 export const SiteFooter = () => {
+  const t = useTranslations("footer");
+  const tn = useTranslations("nav");
   return (
-    <footer className="bg-card border-t border-border py-16 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 mb-12">
+    <footer className="bg-card border-border border-t px-4 py-16">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-12 grid gap-12 md:grid-cols-2">
           <div>
-            <h2 className="text-4xl font-black text-primary mb-6">PEJA FEST</h2>
+            <BrandLogo className="text-primary mb-6 aspect-[390/169] h-16 w-auto" />
             <p className="text-muted-foreground mb-6 text-lg">
-              Kosovo&apos;s premier outdoor festival.
+              {t("tagline")}
               <br />
-              Four days of unforgettable experiences.
+              {t("tagline_two")}
             </p>
             <div className="flex gap-4">
               <a
-                href="#"
-                className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center hover:bg-primary/30 transition-all"
+                href="https://www.instagram.com/pejaoutdoorfestival/"
+                className="bg-primary/20 hover:bg-primary/30 flex h-12 w-12 items-center justify-center rounded-full transition-all"
                 aria-label="Instagram"
               >
-                <Instagram className="w-5 h-5 text-primary" />
+                <Instagram className="text-primary h-5 w-5" />
               </a>
               <a
-                href="#"
-                className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center hover:bg-primary/30 transition-all"
+                href="https://www.facebook.com/profile.php?id=61558655123555"
+                className="bg-primary/20 hover:bg-primary/30 flex h-12 w-12 items-center justify-center rounded-full transition-all"
                 aria-label="Facebook"
               >
-                <Facebook className="w-5 h-5 text-primary" />
-              </a>
-              <a
-                href="#"
-                className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center hover:bg-primary/30 transition-all"
-                aria-label="Twitter"
-              >
-                <Twitter className="w-5 h-5 text-primary" />
+                <Facebook className="text-primary h-5 w-5" />
               </a>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-8">
             <div>
-              <h4 className="font-bold mb-4 text-lg">Quick Links</h4>
+              <h4 className="mb-4 text-lg font-bold">{t("quick_links")}</h4>
               <div className="space-y-3">
                 <Link
                   href="/"
-                  className="block text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-primary block transition-colors"
                 >
-                  Home
+                  {tn("home")}
                 </Link>
                 <Link
                   href="/activities"
-                  className="block text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-primary block transition-colors"
                 >
-                  Activities
+                  {tn("activities")}
                 </Link>
                 <Link
                   href="/news"
-                  className="block text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-primary block transition-colors"
                 >
-                  News
+                  {tn("news")}
                 </Link>
                 <Link
                   href="/gallery"
-                  className="block text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-primary block transition-colors"
                 >
-                  Gallery
+                  {tn("gallery")}
                 </Link>
                 <Link
                   href="/register"
-                  className="block text-muted-foreground hover:text-primary transition-colors"
+                  className="text-muted-foreground hover:text-primary block transition-colors"
                 >
-                  Register
+                  {tn("register")}
                 </Link>
               </div>
             </div>
             <div>
-              <h4 className="font-bold mb-4 text-lg">Contact</h4>
-              <div className="space-y-3 text-muted-foreground">
+              <h4 className="mb-4 text-lg font-bold">{t("contact")}</h4>
+              <div className="text-muted-foreground space-y-3">
                 <p>info@pejaoutdoorfestival.org</p>
                 <p>
                   Festival Grounds
@@ -88,16 +85,14 @@ export const SiteFooter = () => {
           </div>
         </div>
 
-        <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-muted-foreground">
-            &copy; 2026 Peja Outdoor Festival. All rights reserved.
-          </p>
-          <div className="flex gap-6 text-sm text-muted-foreground">
+        <div className="border-border flex flex-col items-center justify-between gap-4 border-t pt-8 md:flex-row">
+          <p className="text-muted-foreground">{t("rights")}</p>
+          <div className="text-muted-foreground flex gap-6 text-sm">
             <a href="#" className="hover:text-primary transition-colors">
-              Privacy Policy
+              {t("privacy")}
             </a>
             <a href="#" className="hover:text-primary transition-colors">
-              Terms of Service
+              {t("terms")}
             </a>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
+import { useFormatDate } from "@/lib/i18n/useFormatDate";
 import type { ActivityListItem, FestivalDay } from "@/lib/api/types";
 
 const HOUR_HEIGHT = 56;
@@ -27,17 +28,15 @@ type TimelineViewProps = {
   selectedDayId: string | null;
 };
 
-const dayLabel = (day: FestivalDay) =>
-  day.label ??
-  new Date(day.date + "T00:00:00").toLocaleDateString("en-US", {
-    weekday: "long",
-  });
-
 export const TimelineView = ({
   activities,
   days,
   selectedDayId,
 }: TimelineViewProps) => {
+  const formatDate = useFormatDate();
+  const dayLabel = (day: FestivalDay) =>
+    day.label ??
+    formatDate(new Date(day.date + "T00:00:00"), { weekday: "long" });
   const visibleDays = selectedDayId
     ? days.filter((d) => d.id === selectedDayId)
     : days;

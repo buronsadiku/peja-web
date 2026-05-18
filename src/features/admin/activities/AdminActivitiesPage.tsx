@@ -1,23 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Trash2, Plus, Pencil } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  Pencil,
+  Image as ImageIcon,
+  Star,
+  Upload,
+  X,
+} from "lucide-react";
 import { api } from "@/lib/api/client";
-import { adminApi, type TemplateCategory } from "../lib/admin-api";
-
-const categories: TemplateCategory[] = [
-  "workshop",
-  "adventure",
-  "music",
-  "food",
-  "wellness",
-  "cultural",
-];
+import {
+  adminApi,
+  type ActivityImageRow,
+  type TemplateCategory,
+} from "../lib/admin-api";
 
 const formatTime = (t: string) => t.slice(0, 5);
 
@@ -27,6 +30,9 @@ export const AdminActivitiesPage = () => {
   const [addOccurrenceFor, setAddOccurrenceFor] = useState<string | null>(null);
   const [editingOccurrence, setEditingOccurrence] = useState<string | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<string | null>(null);
+  const [managingImagesFor, setManagingImagesFor] = useState<string | null>(
+    null,
+  );
 
   const templatesQuery = useQuery({
     queryKey: ["admin", "templates"],
@@ -43,6 +49,14 @@ export const AdminActivitiesPage = () => {
     queryClient.invalidateQueries({ queryKey: ["admin", "occurrences"] });
     queryClient.invalidateQueries({ queryKey: ["activities"] });
     queryClient.invalidateQueries({ queryKey: ["festival-days"] });
+    queryClient.invalidateQueries({ queryKey: ["activity-categories"] });
+  };
+
+  const invalidateImages = (templateId: string) => {
+    queryClient.invalidateQueries({
+      queryKey: ["admin", "activity-images", templateId],
+    });
+    queryClient.invalidateQueries({ queryKey: ["activities"] });
   };
 
   const deleteTemplate = useMutation({
@@ -103,21 +117,41 @@ export const AdminActivitiesPage = () => {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-bold">{template.name}</h2>
+                        <h2 className="text-2xl font-bold">{template.nameEn}</h2>
                         <span className="text-xs px-2 py-1 bg-primary/20 text-primary rounded-full uppercase">
                           {template.category}
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         slug: {template.slug}
+                        {template.nameSq ? (
+                          <span className="ml-2">· SQ: {template.nameSq}</span>
+                        ) : null}
                       </p>
-                      {template.description ? (
+                      {template.descriptionEn ? (
                         <p className="text-sm text-muted-foreground mt-2">
-                          {template.description}
+                          {template.descriptionEn}
                         </p>
                       ) : null}
                     </div>
                     <div className="flex gap-2">
+                      <button
+                        onClick={() =>
+                          setManagingImagesFor(
+                            managingImagesFor === template.id
+                              ? null
+                              : template.id,
+                          )
+                        }
+                        title="Manage images"
+                        className={`p-2 rounded-lg ${
+                          managingImagesFor === template.id
+                            ? "bg-primary/10 text-primary"
+                            : "hover:bg-background"
+                        }`}
+                      >
+                        <ImageIcon className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => setEditingTemplate(template.id)}
                         className="p-2 hover:bg-background rounded-lg"
@@ -126,7 +160,7 @@ export const AdminActivitiesPage = () => {
                       </button>
                       <button
                         onClick={() => {
-                          if (confirm(`Delete activity "${template.name}"?`))
+                          if (confirm(`Delete activity "${template.nameEn}"?`))
                             deleteTemplate.mutate(template.id);
                         }}
                         className="p-2 hover:bg-destructive/10 text-destructive rounded-lg"
@@ -136,6 +170,16 @@ export const AdminActivitiesPage = () => {
                     </div>
                   </div>
                 )}
+
+                {managingImagesFor === template.id ? (
+                  <div className="border-t border-border pt-4 mb-4">
+                    <ImageManager
+                      templateId={template.id}
+                      onUpdated={() => invalidateImages(template.id)}
+                      onClose={() => setManagingImagesFor(null)}
+                    />
+                  </div>
+                ) : null}
 
                 <div className="border-t border-border pt-4">
                   <div className="flex items-center justify-between mb-3">
@@ -255,20 +299,47 @@ const TemplateForm = ({
 }: {
   template?: {
     id: string;
-    name: string;
+    nameEn: string;
+    nameSq: string | null;
     slug: string;
-    description: string | null;
+    descriptionEn: string | null;
+    descriptionSq: string | null;
+    contactPhone1: string | null;
+    contactPhone2: string | null;
     category: TemplateCategory;
   };
   onClose: () => void;
   onSaved: () => void;
 }) => {
-  const [name, setName] = useState(template?.name ?? "");
+  const queryClient = useQueryClient();
+  const categoriesQuery = useQuery({
+    queryKey: ["admin", "activity-categories"],
+    queryFn: adminApi.activityCategories.list,
+  });
+  const categoryRows = categoriesQuery.data ?? [];
+  const defaultCategory = template?.category ?? categoryRows[0]?.value ?? "";
+
+  const [nameEn, setNameEn] = useState(template?.nameEn ?? "");
+  const [nameSq, setNameSq] = useState(template?.nameSq ?? "");
   const [slug, setSlug] = useState(template?.slug ?? "");
-  const [description, setDescription] = useState(template?.description ?? "");
-  const [category, setCategory] = useState<TemplateCategory>(
-    template?.category ?? "workshop",
+  const [descriptionEn, setDescriptionEn] = useState(
+    template?.descriptionEn ?? "",
   );
+  const [descriptionSq, setDescriptionSq] = useState(
+    template?.descriptionSq ?? "",
+  );
+  const [contactPhone1, setContactPhone1] = useState(
+    template?.contactPhone1 ?? "",
+  );
+  const [contactPhone2, setContactPhone2] = useState(
+    template?.contactPhone2 ?? "",
+  );
+  const [category, setCategory] = useState<TemplateCategory>(defaultCategory);
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [newCatValue, setNewCatValue] = useState("");
+  const [newCatLabelEn, setNewCatLabelEn] = useState("");
+  const [newCatLabelSq, setNewCatLabelSq] = useState("");
+  const [addCatError, setAddCatError] = useState<string | null>(null);
 
   const create = useMutation({
     mutationFn: adminApi.templates.create,
@@ -282,9 +353,13 @@ const TemplateForm = ({
       id,
       ...rest
     }: { id: string } & Partial<{
-      name: string;
+      nameEn: string;
+      nameSq: string | null;
       slug: string;
-      description: string | null;
+      descriptionEn: string | null;
+      descriptionSq: string | null;
+      contactPhone1: string | null;
+      contactPhone2: string | null;
       category: TemplateCategory;
     }>) => adminApi.templates.update(id, rest),
     onSuccess: () => {
@@ -293,12 +368,50 @@ const TemplateForm = ({
     },
   });
 
+  const createCategory = useMutation({
+    mutationFn: adminApi.activityCategories.create,
+    onSuccess: (created) => {
+      setAddCatError(null);
+      setShowAddCategory(false);
+      setNewCatValue("");
+      setNewCatLabelEn("");
+      setNewCatLabelSq("");
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "activity-categories"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["activity-categories"] });
+      setCategory(created.value);
+    },
+    onError: (err: Error) => setAddCatError(err.message),
+  });
+
+  const deleteCategory = useMutation({
+    mutationFn: adminApi.activityCategories.delete,
+    onSuccess: (_void, deletedId) => {
+      setAddCatError(null);
+      const deletedRow = categoryRows.find((c) => c.id === deletedId);
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "activity-categories"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["activity-categories"] });
+      if (deletedRow && deletedRow.value === category) {
+        const remaining = categoryRows.filter((c) => c.id !== deletedId);
+        setCategory(remaining[0]?.value ?? "");
+      }
+    },
+    onError: (err: Error) => setAddCatError(err.message),
+  });
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const payload = {
-      name,
+      nameEn,
+      nameSq: nameSq || null,
       slug,
-      description: description || null,
+      descriptionEn: descriptionEn || null,
+      descriptionSq: descriptionSq || null,
+      contactPhone1: contactPhone1.trim() || null,
+      contactPhone2: contactPhone2.trim() || null,
       category,
     };
     if (template) {
@@ -308,50 +421,236 @@ const TemplateForm = ({
     }
   };
 
+  const submitNewCategory = () => {
+    const value = newCatValue.trim().toLowerCase();
+    const labelEn = newCatLabelEn.trim();
+    const labelSq = newCatLabelSq.trim();
+    if (!value || !labelEn) {
+      setAddCatError("value and English label required");
+      return;
+    }
+    if (!/^[a-z][a-z0-9_-]*$/.test(value)) {
+      setAddCatError("value must be lowercase letters/numbers/_/-, start with letter");
+      return;
+    }
+    createCategory.mutate({
+      value,
+      labelEn,
+      labelSq: labelSq || null,
+    });
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
       className="bg-background border-2 border-primary rounded-xl p-5 mb-4 space-y-3"
     >
-      <div className="grid md:grid-cols-2 gap-3">
-        <input
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-          className="px-4 py-2 bg-card border border-border rounded-lg"
-        />
-        <input
-          required
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          placeholder="slug-like-this"
-          className="px-4 py-2 bg-card border border-border rounded-lg"
-        />
-      </div>
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Description (optional)"
+      <input
+        required
+        value={slug}
+        onChange={(e) => setSlug(e.target.value)}
+        placeholder="slug-like-this (shared across locales)"
         className="w-full px-4 py-2 bg-card border border-border rounded-lg"
-        rows={2}
       />
-      <select
-        value={category}
-        onChange={(e) => setCategory(e.target.value as TemplateCategory)}
-        className="px-4 py-2 bg-card border border-border rounded-lg"
-      >
-        {categories.map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
-      </select>
+      <div className="grid md:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs uppercase text-muted-foreground tracking-wider font-bold">
+            Name · English (required)
+          </label>
+          <input
+            required
+            value={nameEn}
+            onChange={(e) => setNameEn(e.target.value)}
+            placeholder="Name in English"
+            className="w-full px-4 py-2 bg-card border border-border rounded-lg"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs uppercase text-muted-foreground tracking-wider font-bold">
+            Name · Albanian (optional)
+          </label>
+          <input
+            value={nameSq}
+            onChange={(e) => setNameSq(e.target.value)}
+            placeholder="Emri në shqip"
+            className="w-full px-4 py-2 bg-card border border-border rounded-lg"
+          />
+        </div>
+      </div>
+      <div className="grid md:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs uppercase text-muted-foreground tracking-wider font-bold">
+            Description · English
+          </label>
+          <textarea
+            value={descriptionEn}
+            onChange={(e) => setDescriptionEn(e.target.value)}
+            placeholder="Description in English (optional)"
+            className="w-full px-4 py-2 bg-card border border-border rounded-lg"
+            rows={3}
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs uppercase text-muted-foreground tracking-wider font-bold">
+            Description · Albanian
+          </label>
+          <textarea
+            value={descriptionSq}
+            onChange={(e) => setDescriptionSq(e.target.value)}
+            placeholder="Përshkrimi në shqip (optional)"
+            className="w-full px-4 py-2 bg-card border border-border rounded-lg"
+            rows={3}
+          />
+        </div>
+      </div>
+      <div className="grid md:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs uppercase text-muted-foreground tracking-wider font-bold">
+            Contact phone 1 (optional)
+          </label>
+          <input
+            type="tel"
+            value={contactPhone1}
+            onChange={(e) => setContactPhone1(e.target.value)}
+            placeholder="+383 ..."
+            className="w-full px-4 py-2 bg-card border border-border rounded-lg"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs uppercase text-muted-foreground tracking-wider font-bold">
+            Contact phone 2 (optional)
+          </label>
+          <input
+            type="tel"
+            value={contactPhone2}
+            onChange={(e) => setContactPhone2(e.target.value)}
+            placeholder="+383 ..."
+            className="w-full px-4 py-2 bg-card border border-border rounded-lg"
+          />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            disabled={categoriesQuery.isLoading}
+            className="flex-1 px-4 py-2 bg-card border border-border rounded-lg"
+          >
+            {categoryRows.length === 0 ? (
+              <option value="">No categories — add one</option>
+            ) : null}
+            {categoryRows.map((c) => (
+              <option key={c.id} value={c.value}>
+                {c.labelEn}
+                {c.labelSq ? ` / ${c.labelSq}` : ""}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => setShowAddCategory((v) => !v)}
+            className="px-3 py-2 bg-card border border-border rounded-lg hover:border-primary text-sm flex items-center gap-1"
+          >
+            {showAddCategory ? (
+              <X className="w-3 h-3" />
+            ) : (
+              <Plus className="w-3 h-3" />
+            )}
+            Category
+          </button>
+        </div>
+        {showAddCategory ? (
+          <div className="bg-card border border-border rounded-lg p-3 space-y-3">
+            <div className="space-y-2">
+              <p className="text-xs uppercase text-muted-foreground tracking-wider">
+                New category
+              </p>
+              <input
+                value={newCatValue}
+                onChange={(e) => setNewCatValue(e.target.value)}
+                placeholder="value (e.g. yoga)"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  value={newCatLabelEn}
+                  onChange={(e) => setNewCatLabelEn(e.target.value)}
+                  placeholder="Label · English"
+                  className="px-3 py-2 bg-background border border-border rounded-lg text-sm"
+                />
+                <input
+                  value={newCatLabelSq}
+                  onChange={(e) => setNewCatLabelSq(e.target.value)}
+                  placeholder="Label · Albanian (optional)"
+                  className="px-3 py-2 bg-background border border-border rounded-lg text-sm"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={submitNewCategory}
+                disabled={createCategory.isPending}
+                className="bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-bold text-sm disabled:opacity-50"
+              >
+                {createCategory.isPending ? "Adding…" : "Add category"}
+              </button>
+            </div>
+
+            {categoryRows.length > 0 ? (
+              <div className="space-y-2 border-t border-border pt-3">
+                <p className="text-xs uppercase text-muted-foreground tracking-wider">
+                  Existing categories
+                </p>
+                <ul className="space-y-1">
+                  {categoryRows.map((c) => (
+                    <li
+                      key={c.id}
+                      className="flex items-center justify-between bg-background border border-border rounded-lg px-3 py-1.5 text-sm"
+                    >
+                      <span>
+                        <span className="font-bold">{c.labelEn}</span>
+                        {c.labelSq ? (
+                          <span className="text-muted-foreground ml-2">
+                            / {c.labelSq}
+                          </span>
+                        ) : null}
+                        <span className="text-muted-foreground ml-2">
+                          {c.value}
+                        </span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (
+                            confirm(
+                              `Delete category "${c.labelEn}"? Activities using it will block deletion.`,
+                            )
+                          )
+                            deleteCategory.mutate(c.id);
+                        }}
+                        disabled={deleteCategory.isPending}
+                        className="text-destructive hover:bg-destructive/10 rounded-md p-1 disabled:opacity-50"
+                        title="Delete category"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {addCatError ? (
+              <p className="text-xs text-destructive">{addCatError}</p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={create.isPending || update.isPending}
-          className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-bold"
+          disabled={create.isPending || update.isPending || !category}
+          className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-bold disabled:opacity-50"
         >
           {template ? "Update" : "Create"}
         </button>
@@ -563,5 +862,195 @@ const OccurrenceForm = ({
         </button>
       </div>
     </form>
+  );
+};
+
+const ImageManager = ({
+  templateId,
+  onUpdated,
+  onClose,
+}: {
+  templateId: string;
+  onUpdated: () => void;
+  onClose: () => void;
+}) => {
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const imagesQuery = useQuery({
+    queryKey: ["admin", "activity-images", templateId],
+    queryFn: () => adminApi.activityImages.list(templateId),
+  });
+  const images = imagesQuery.data ?? [];
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["admin", "activity-images", templateId],
+    });
+    onUpdated();
+  };
+
+  const remove = useMutation({
+    mutationFn: adminApi.activityImages.delete,
+    onSuccess: invalidate,
+  });
+
+  const onFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []).filter((f) =>
+      f.type.startsWith("image/"),
+    );
+    if (files.length === 0) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const baseSort = images.length;
+      for (let i = 0; i < files.length; i++) {
+        const url = await adminApi.activityImages.upload(files[i]);
+        await adminApi.activityImages.create({
+          templateId,
+          url,
+          alt: files[i].name.replace(/\.[^.]+$/, ""),
+          sortOrder: baseSort + i,
+          isCover: images.length === 0 && i === 0,
+        });
+      }
+      invalidate();
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-bold">Images ({images.length})</h3>
+        <div className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={onFiles}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-bold text-sm flex items-center gap-1 disabled:opacity-50"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            {uploading ? "Uploading…" : "Upload"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-card border border-border px-3 py-1.5 rounded-lg text-sm"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+
+      {uploadError ? (
+        <p className="text-sm text-destructive mb-2">{uploadError}</p>
+      ) : null}
+
+      {imagesQuery.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : images.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No images yet. Upload at least one — the first becomes the cover.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {images.map((img) => (
+            <ActivityImageCard
+              key={img.id}
+              image={img}
+              onChanged={invalidate}
+              onDelete={() => {
+                if (confirm("Delete this image?")) remove.mutate(img.id);
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ActivityImageCard = ({
+  image,
+  onChanged,
+  onDelete,
+}: {
+  image: ActivityImageRow;
+  onChanged: () => void;
+  onDelete: () => void;
+}) => {
+  const [alt, setAlt] = useState(image.alt);
+
+  const update = useMutation({
+    mutationFn: (body: Partial<{ alt: string; isCover: boolean; sortOrder: number }>) =>
+      adminApi.activityImages.update(image.id, body),
+    onSuccess: onChanged,
+  });
+
+  const commitAlt = () => {
+    if (alt !== image.alt) update.mutate({ alt });
+  };
+
+  return (
+    <div className="bg-background border border-border rounded-lg overflow-hidden">
+      <div className="relative">
+        <img
+          src={image.url}
+          alt={image.alt}
+          className="w-full h-32 object-cover"
+        />
+        <button
+          type="button"
+          onClick={() => update.mutate({ isCover: !image.isCover })}
+          title={image.isCover ? "Cover image" : "Set as cover"}
+          className={`absolute top-2 right-2 rounded-full p-1.5 border ${
+            image.isCover
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-background/80 border-border hover:border-primary"
+          }`}
+        >
+          <Star
+            className="w-3.5 h-3.5"
+            fill={image.isCover ? "currentColor" : "none"}
+          />
+        </button>
+      </div>
+      <div className="p-2 space-y-2">
+        <input
+          value={alt}
+          onChange={(e) => setAlt(e.target.value)}
+          onBlur={commitAlt}
+          placeholder="Alt text"
+          className="w-full px-2 py-1 bg-card border border-border rounded text-xs"
+        />
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">
+            {image.isCover ? "Cover" : `#${image.sortOrder}`}
+          </span>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="text-xs px-2 py-1 bg-destructive/10 text-destructive border border-destructive rounded-md flex items-center gap-1"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };

@@ -35,6 +35,8 @@ export type ActivityDetail = {
   name: string;
   description: string | null;
   category: ActivityCategory;
+  contactPhone1: string | null;
+  contactPhone2: string | null;
   coverImageUrl: string | null;
   images: ActivityImageItem[];
   occurrences: ActivityListItem[];
@@ -83,13 +85,14 @@ export type FestivalDay = {
   sortOrder: number;
 };
 
-export type ActivityCategory =
-  | "workshop"
-  | "adventure"
-  | "music"
-  | "food"
-  | "wellness"
-  | "cultural";
+export type ActivityCategory = string;
+
+export type ActivityCategoryItem = {
+  id: string;
+  value: string;
+  label: string;
+  sortOrder: number;
+};
 
 export type GallerySection = "live" | "workshops" | "adventures" | "food";
 
@@ -101,6 +104,7 @@ export type GalleryImage = {
   caption: string | null;
   section: GallerySection;
   sortOrder: number;
+  showOnLanding: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -138,6 +142,26 @@ export type CreateRegistrationResponse = {
   date: string;
   festivalDayId: string;
   activities: string[];
+};
+
+export type Musician = {
+  id: string;
+  festivalDayId: string;
+  festivalDayDate: string;
+  festivalDayLabel: string | null;
+  name: string;
+  description: string | null;
+  photoUrl: string;
+  sortOrder: number;
+};
+
+export type Community = {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl: string;
+  description: string;
+  sortOrder: number;
 };
 
 export type ApiError = {

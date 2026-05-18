@@ -32,6 +32,58 @@ export const adminApi = {
     delete: (id: string) =>
       request<void>(`/api/admin/activities/${id}`, { method: "DELETE" }),
   },
+  activityCategories: {
+    list: () =>
+      request<{ data: ActivityCategoryRow[] }>(
+        "/api/admin/activity-categories",
+      ).then((r) => r.data),
+    create: (body: ActivityCategoryInput) =>
+      request<{ data: ActivityCategoryRow }>(
+        "/api/admin/activity-categories",
+        { method: "POST", body: JSON.stringify(body) },
+      ).then((r) => r.data),
+    update: (id: string, body: Partial<ActivityCategoryInput>) =>
+      request<{ data: ActivityCategoryRow }>(
+        `/api/admin/activity-categories/${id}`,
+        { method: "PATCH", body: JSON.stringify(body) },
+      ).then((r) => r.data),
+    delete: (id: string) =>
+      request<void>(`/api/admin/activity-categories/${id}`, {
+        method: "DELETE",
+      }),
+  },
+  activityImages: {
+    list: (templateId: string) =>
+      request<{ data: ActivityImageRow[] }>(
+        `/api/admin/activity-images?templateId=${templateId}`,
+      ).then((r) => r.data),
+    create: (body: ActivityImageInput) =>
+      request<{ data: ActivityImageRow }>("/api/admin/activity-images", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }).then((r) => r.data),
+    update: (id: string, body: Partial<ActivityImagePatch>) =>
+      request<{ data: ActivityImageRow }>(
+        `/api/admin/activity-images/${id}`,
+        { method: "PATCH", body: JSON.stringify(body) },
+      ).then((r) => r.data),
+    delete: (id: string) =>
+      request<void>(`/api/admin/activity-images/${id}`, { method: "DELETE" }),
+    upload: async (file: File): Promise<string> => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/activity-images/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(text || `upload failed (${res.status})`);
+      }
+      const json = (await res.json()) as { data: { publicUrl: string } };
+      return json.data.publicUrl;
+    },
+  },
   occurrences: {
     create: (body: OccurrenceInput) =>
       request<{ data: OccurrenceRow }>("/api/admin/occurrences", {
@@ -51,11 +103,14 @@ export const adminApi = {
       page?: number;
       limit?: number;
       section?: GallerySection;
+      showOnLanding?: boolean;
     }) => {
       const search = new URLSearchParams();
       if (params?.page) search.set("page", String(params.page));
       if (params?.limit) search.set("limit", String(params.limit));
       if (params?.section) search.set("section", params.section);
+      if (typeof params?.showOnLanding === "boolean")
+        search.set("showOnLanding", String(params.showOnLanding));
       const qs = search.toString();
       return request<PaginatedResponse<GalleryRow>>(
         `/api/admin/gallery${qs ? `?${qs}` : ""}`,
@@ -147,29 +202,72 @@ export type PaginatedResponse<T> = {
   };
 };
 
-export type TemplateCategory =
-  | "workshop"
-  | "adventure"
-  | "music"
-  | "food"
-  | "wellness"
-  | "cultural";
+export type TemplateCategory = string;
 
 export type ActivityTemplateRow = {
   id: string;
-  name: string;
+  nameEn: string;
+  nameSq: string | null;
   slug: string;
-  description: string | null;
+  descriptionEn: string | null;
+  descriptionSq: string | null;
+  contactPhone1: string | null;
+  contactPhone2: string | null;
   category: TemplateCategory;
   createdAt: string;
   updatedAt: string;
 };
 
 export type TemplateInput = {
-  name: string;
+  nameEn: string;
+  nameSq?: string | null;
   slug: string;
-  description?: string | null;
+  descriptionEn?: string | null;
+  descriptionSq?: string | null;
+  contactPhone1?: string | null;
+  contactPhone2?: string | null;
   category: TemplateCategory;
+};
+
+export type ActivityCategoryRow = {
+  id: string;
+  value: string;
+  labelEn: string;
+  labelSq: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ActivityCategoryInput = {
+  value: string;
+  labelEn: string;
+  labelSq?: string | null;
+  sortOrder?: number;
+};
+
+export type ActivityImageRow = {
+  id: string;
+  templateId: string;
+  url: string;
+  alt: string;
+  sortOrder: number;
+  isCover: boolean;
+  createdAt: string;
+};
+
+export type ActivityImageInput = {
+  templateId: string;
+  url: string;
+  alt?: string;
+  sortOrder?: number;
+  isCover?: boolean;
+};
+
+export type ActivityImagePatch = {
+  alt: string;
+  sortOrder: number;
+  isCover: boolean;
 };
 
 export type OccurrenceRow = {
@@ -223,6 +321,7 @@ export type GalleryRow = {
   caption: string | null;
   section: GallerySection;
   sortOrder: number;
+  showOnLanding: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -234,6 +333,7 @@ export type GalleryInput = {
   caption?: string | null;
   section: GallerySection;
   sortOrder?: number;
+  showOnLanding?: boolean;
 };
 
 export type RegistrationRow = {

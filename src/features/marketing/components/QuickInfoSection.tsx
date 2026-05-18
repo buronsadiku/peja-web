@@ -1,6 +1,8 @@
 import { Calendar, MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export const QuickInfoSection = () => {
+  const t = useTranslations("quick_info");
   return (
     <section
       id="info"
@@ -14,10 +16,10 @@ export const QuickInfoSection = () => {
             <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
               <Calendar className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-2xl font-black mb-2">WHEN</h3>
-            <p className="text-muted-foreground">June 18-21, 2026</p>
+            <h3 className="text-2xl font-black mb-2">{t("when")}</h3>
+            <p className="text-muted-foreground">{t("when_value")}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              4 Days of Activities
+              {t("when_note")}
             </p>
           </div>
 
@@ -25,10 +27,10 @@ export const QuickInfoSection = () => {
             <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
               <MapPin className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-2xl font-black mb-2">WHERE</h3>
-            <p className="text-muted-foreground">Peja, Kosovo</p>
+            <h3 className="text-2xl font-black mb-2">{t("where")}</h3>
+            <p className="text-muted-foreground">{t("where_value")}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Festival Grounds
+              {t("where_note")}
             </p>
           </div>
 
@@ -36,10 +38,10 @@ export const QuickInfoSection = () => {
             <div className="w-16 h-16 bg-primary/30 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
               <span className="text-3xl">🎫</span>
             </div>
-            <h3 className="text-2xl font-black mb-2">TICKETS</h3>
-            <p className="text-primary text-xl">Free Entry</p>
+            <h3 className="text-2xl font-black mb-2">{t("tickets")}</h3>
+            <p className="text-primary text-xl">{t("tickets_value")}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Registration Required
+              {t("tickets_note")}
             </p>
           </div>
         </div>

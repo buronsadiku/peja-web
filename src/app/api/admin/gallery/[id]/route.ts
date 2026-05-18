@@ -12,6 +12,7 @@ const patchSchema = z.object({
   caption: z.string().nullable().optional(),
   section: z.enum(["live", "workshops", "adventures", "food"]).optional(),
   sortOrder: z.number().int().optional(),
+  showOnLanding: z.boolean().optional(),
 });
 
 type Ctx = { params: Promise<{ id: string }> };

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "@/lib/auth/client";
+import { BrandLogo } from "@/features/layout/BrandLogo";
 
 const LoginForm = () => {
   const router = useRouter();
@@ -37,7 +38,7 @@ const LoginForm = () => {
       onSubmit={handleSubmit}
       className="w-full max-w-md bg-card border border-border rounded-3xl p-10 shadow-2xl"
     >
-      <h1 className="text-4xl font-black text-primary mb-2">PEJA.FEST</h1>
+      <BrandLogo className="h-14 w-auto aspect-[390/169] text-primary mb-2" />
       <p className="text-muted-foreground mb-8">Admin sign-in</p>
 
       <div className="mb-5">

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { galleryImages } from "@/lib/db/schema";
@@ -14,6 +14,7 @@ const createSchema = z.object({
   caption: z.string().nullable().optional(),
   section: z.enum(["live", "workshops", "adventures", "food"]),
   sortOrder: z.number().int().default(0),
+  showOnLanding: z.boolean().optional().default(false),
 });
 
 export const GET = async (request: Request) => {
@@ -29,9 +30,22 @@ export const GET = async (request: Request) => {
   const sectionParam = url.searchParams.get("section");
   const sectionResult = sectionParam ? sectionEnum.safeParse(sectionParam) : null;
   const sectionFilter = sectionResult?.success ? sectionResult.data : null;
-  const where = sectionFilter
-    ? eq(galleryImages.section, sectionFilter)
-    : undefined;
+  const landingParam = url.searchParams.get("showOnLanding");
+  const landingFilter =
+    landingParam === "true" ? true : landingParam === "false" ? false : null;
+
+  const conditions = [
+    sectionFilter ? eq(galleryImages.section, sectionFilter) : null,
+    landingFilter !== null
+      ? eq(galleryImages.showOnLanding, landingFilter)
+      : null,
+  ].filter(Boolean) as ReturnType<typeof eq>[];
+  const where =
+    conditions.length === 0
+      ? undefined
+      : conditions.length === 1
+        ? conditions[0]
+        : and(...conditions);
   const offset = (page - 1) * limit;
 
   const [{ count }] = await db
@@ -43,7 +57,11 @@ export const GET = async (request: Request) => {
     .select()
     .from(galleryImages)
     .where(where)
-    .orderBy(asc(galleryImages.section), asc(galleryImages.sortOrder))
+    .orderBy(
+      asc(galleryImages.section),
+      asc(galleryImages.sortOrder),
+      asc(galleryImages.id),
+    )
     .limit(limit)
     .offset(offset);
 

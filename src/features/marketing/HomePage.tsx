@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { CtaSection } from "./components/CtaSection";
-import { HeadlinersSection } from "./components/HeadlinersSection";
 import { HeroSection } from "./components/HeroSection";
+import { LineupSection } from "./components/LineupSection";
 import { MemoriesSection } from "./components/MemoriesSection";
+import { MemoriesSectionSkeleton } from "./components/MemoriesSectionSkeleton";
 import { QuickInfoSection } from "./components/QuickInfoSection";
 import { SponsorsSection } from "./components/SponsorsSection";
 
@@ -10,8 +12,12 @@ export const HomePage = () => {
     <>
       <HeroSection />
       <QuickInfoSection />
-      <HeadlinersSection />
-      <MemoriesSection />
+      <Suspense fallback={null}>
+        <LineupSection />
+      </Suspense>
+      <Suspense fallback={<MemoriesSectionSkeleton />}>
+        <MemoriesSection />
+      </Suspense>
       <SponsorsSection />
       <CtaSection />
     </>

@@ -18,7 +18,7 @@ export const GET = async (request: Request) => {
   const rows = await db
     .select()
     .from(festivalDays)
-    .orderBy(asc(festivalDays.sortOrder), asc(festivalDays.date));
+    .orderBy(asc(festivalDays.date));
   return NextResponse.json({ data: rows });
 };
 
